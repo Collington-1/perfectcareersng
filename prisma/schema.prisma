@@ -1,0 +1,283 @@
+// PerfectCareersNG data model.
+// Prisma 7: connection URL lives in prisma.config.ts, not here.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ContentType {
+  JOB
+  SCHOLARSHIP
+  GRANT
+  BLOG
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+}
+
+enum WorkMode {
+  ONSITE
+  REMOTE
+  HYBRID
+}
+
+// Shared taxonomy across content types, scoped by `type`.
+// e.g. a Job's categoryId always points at a Category with type = JOB.
+model Category {
+  id          String      @id @default(cuid())
+  type        ContentType
+  name        String
+  slug        String
+  description String?
+
+  jobs         Job[]
+  scholarships Scholarship[]
+  grants       Grant[]
+  blogPosts    BlogPost[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([type, slug])
+  @@index([type])
+}
+
+// Tags are only used on blog content.
+model Tag {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  blogPosts BlogPost[]
+}
+
+model Company {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  logoUrl     String?
+  website     String?
+  description String?
+
+  jobs Job[]
+
+  createdAt DateTime @default(now())
+}
+
+model Author {
+  id        String  @id @default(cuid())
+  name      String
+  slug      String  @unique
+  avatarUrl String?
+  bio       String?
+  role      String?
+
+  blogPosts BlogPost[]
+
+  createdAt DateTime @default(now())
+}
+
+model Job {
+  id          String @id @default(cuid())
+  title       String
+  slug        String @unique
+  description String
+
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  employmentType  EmploymentType
+  workMode        WorkMode
+  experienceLevel String?
+  qualification   String?
+
+  salaryMin      Int?
+  salaryMax      Int?
+  salaryCurrency String @default("NGN")
+
+  country String
+  state   String?
+  city    String?
+
+  requirements     String?
+  applicationUrl   String
+  featuredImageUrl String?
+
+  seoTitle       String?
+  seoDescription String?
+
+  isFeatured  Boolean   @default(false)
+  publishedAt DateTime  @default(now())
+  deadline    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([publishedAt])
+  @@index([categoryId])
+}
+
+model Scholarship {
+  id    String @id @default(cuid())
+  title String
+  slug  String @unique
+
+  country    String
+  university String
+
+  amount      String?
+  fundingType String?
+
+  eligibility  String
+  requirements String?
+  documents    String?
+  howToApply   String?
+  officialUrl  String
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  featuredImageUrl String?
+  seoTitle         String?
+  seoDescription   String?
+
+  isFeatured  Boolean   @default(false)
+  publishedAt DateTime  @default(now())
+  deadline    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([publishedAt])
+  @@index([categoryId])
+}
+
+model Grant {
+  id       String @id @default(cuid())
+  title    String
+  slug     String @unique
+  provider String
+
+  fundingAmount String?
+  eligibility   String
+  country       String
+  businessStage String?
+  industry      String?
+
+  requirements   String?
+  applicationUrl String
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  featuredImageUrl String?
+  seoTitle         String?
+  seoDescription   String?
+
+  isFeatured  Boolean   @default(false)
+  publishedAt DateTime  @default(now())
+  deadline    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([publishedAt])
+  @@index([categoryId])
+}
+
+model BlogPost {
+  id      String @id @default(cuid())
+  title   String
+  slug    String @unique
+  excerpt String
+
+  // Tiptap document JSON (source of truth, editable) + rendered HTML cache
+  // (fast public-page rendering without re-serializing on every request).
+  content     Json
+  contentHtml String
+
+  featuredImageUrl String?
+
+  authorId   String
+  author     Author   @relation(fields: [authorId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  tags       Tag[]
+
+  readingTimeMinutes Int     @default(5)
+  seoTitle           String?
+  seoDescription     String?
+
+  isFeatured  Boolean  @default(false)
+  publishedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([publishedAt])
+  @@index([categoryId])
+}
+
+model Testimonial {
+  id        String  @id @default(cuid())
+  name      String
+  role      String?
+  company   String?
+  avatarUrl String?
+  quote     String
+  rating    Int?    @default(5)
+
+  isFeatured Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  isActive     Boolean  @default(true)
+  subscribedAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id      String  @id @default(cuid())
+  name    String
+  email   String
+  phone   String?
+  subject String?
+  message String
+
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model WhatsAppLead {
+  id     String  @id @default(cuid())
+  name   String?
+  phone  String?
+  source String?
+
+  createdAt DateTime @default(now())
+}
+
+// Admin-only auth for v1 (NextAuth credentials provider, added in the
+// Admin Dashboard phase).
+model AdminUser {
+  id           String @id @default(cuid())
+  email        String @unique
+  passwordHash String
+  name         String
+  role         String @default("ADMIN")
+
+  createdAt DateTime @default(now())
+}
