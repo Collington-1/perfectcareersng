@@ -13,6 +13,10 @@ import { cn } from "@/lib/utils";
 // /public/images/ and list them here — the slider logic doesn't change.
 const heroSlides = [
   { src: "/images/hero-professionals.png", alt: "Premium Nigerian professionals celebrating career success" },
+  { src: "/images/hero-scholarship.png", alt: "Nigerian student celebrating a scholarship acceptance" },
+  { src: "/images/hero-grant.png", alt: "Nigerian entrepreneur shaking hands after securing business funding" },
+  { src: "/images/hero-remote.png", alt: "Nigerian professional thriving in a remote job" },
+  { src: "/images/hero-interview.png", alt: "Nigerian professional walking confidently into a job interview" },
 ];
 
 const stats = [
