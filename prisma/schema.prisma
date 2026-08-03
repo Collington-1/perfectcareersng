@@ -110,7 +110,8 @@ model Job {
   state   String?
   city    String?
 
-  requirements     String?
+  responsibilities Json? // string[]
+  requirements     Json? // string[]
   applicationUrl   String
   featuredImageUrl String?
 
@@ -142,9 +143,9 @@ model Scholarship {
   amount      String?
   fundingType String?
 
-  eligibility  String
-  requirements String?
-  documents    String?
+  eligibility  Json // string[]
+  requirements Json? // string[]
+  documents    Json? // string[]
   howToApply   String?
   officialUrl  String
 
@@ -176,12 +177,12 @@ model Grant {
   provider String
 
   fundingAmount String?
-  eligibility   String
+  eligibility   Json // string[]
   country       String
   businessStage String?
   industry      String?
 
-  requirements   String?
+  requirements   Json? // string[]
   applicationUrl String
 
   categoryId String
