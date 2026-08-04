@@ -6,7 +6,8 @@ import { PageHero } from "@/components/layout/page-hero";
 import { AdSlot } from "@/components/layout/ad-slot";
 import { JobCard } from "@/components/content/job-card";
 import { Button } from "@/components/ui/button";
-import { mockJobs, jobCategories } from "@/lib/mock-data";
+import { jobCategories } from "@/lib/mock-data";
+import { getAllJobs } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Job Vacancies in Nigeria — Latest Openings | PerfectCareers",
@@ -25,7 +26,8 @@ export default async function JobsPage({
 
   const categoryLabel = jobCategories.find((c) => c.slug === params.category)?.label;
 
-  const filtered = mockJobs.filter((job) => {
+  const jobs = await getAllJobs();
+  const filtered = jobs.filter((job) => {
     if (isRemote && job.workMode !== "Remote") return false;
     if (categoryLabel && job.category !== categoryLabel) return false;
     if (params.mode && job.workMode.toLowerCase() !== params.mode) return false;
@@ -90,7 +92,7 @@ export default async function JobsPage({
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{filtered.length}</span> of {mockJobs.length} listings
+              Showing <span className="font-semibold text-foreground">{filtered.length}</span> of {jobs.length} listings
             </p>
             <Link href="/jobs/categories" className="text-sm font-semibold text-primary hover:text-primary/80">
               Browse by category →

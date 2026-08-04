@@ -10,26 +10,29 @@ import { GrantCard } from "@/components/content/grant-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDeadline } from "@/lib/format";
-import { mockGrants } from "@/lib/mock-data";
 import { whatsappLink } from "@/lib/site-config";
+import { getAllGrants } from "@/lib/data";
 
-export function generateStaticParams() {
-  return mockGrants.map((g) => ({ slug: g.slug }));
+export async function generateStaticParams() {
+  const grants = await getAllGrants();
+  return grants.map((g) => ({ slug: g.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const g = mockGrants.find((x) => x.slug === slug);
+  const grants = await getAllGrants();
+  const g = grants.find((x) => x.slug === slug);
   if (!g) return {};
   return { title: `${g.title} — ${g.provider} | PerfectCareers`, description: g.description, alternates: { canonical: `/grants/${g.slug}` } };
 }
 
 export default async function GrantDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const grant = mockGrants.find((g) => g.slug === slug);
+  const grants = await getAllGrants();
+  const grant = grants.find((g) => g.slug === slug);
   if (!grant) notFound();
 
-  const related = mockGrants.filter((g) => g.slug !== grant.slug && g.industry === grant.industry).slice(0, 3);
+  const related = grants.filter((g) => g.slug !== grant.slug && g.industry === grant.industry).slice(0, 3);
 
   return (
     <>

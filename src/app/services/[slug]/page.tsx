@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { services, getService } from "@/lib/services-data";
-import { mockTestimonials } from "@/lib/mock-data";
+import { getAllTestimonials } from "@/lib/data";
 import { whatsappLink } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +31,8 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   if (!service) notFound();
 
   const related = services.filter((s) => s.slug !== service.slug).slice(0, 3);
-  const testimonials = mockTestimonials.slice(0, 3);
+  const allTestimonials = await getAllTestimonials();
+  const testimonials = allTestimonials.slice(0, 3);
 
   return (
     <>

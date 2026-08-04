@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 import { Container, Section } from "@/components/layout/container";
 import { SectionHeading } from "@/components/home/section-heading";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { mockTestimonials } from "@/lib/mock-data";
+import { getAllTestimonials } from "@/lib/data";
 
 function initials(name: string) {
   return name
@@ -13,7 +13,8 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-export function Testimonials() {
+export async function Testimonials() {
+  const testimonials = await getAllTestimonials();
   return (
     <Section className="bg-muted/40">
       <Container>
@@ -25,7 +26,7 @@ export function Testimonials() {
         />
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {mockTestimonials.map((testimonial) => (
+          {testimonials.map((testimonial) => (
             <figure
               key={testimonial.name}
               className="flex flex-col gap-4 rounded-2xl bg-white p-6 ring-1 ring-border"

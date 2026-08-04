@@ -4,7 +4,8 @@ import { Newspaper } from "lucide-react";
 import { Container, Section } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
 import { BlogCard } from "@/components/content/blog-card";
-import { mockBlogPosts, blogCategories } from "@/lib/mock-data";
+import { blogCategories } from "@/lib/mock-data";
+import { getAllBlogPosts } from "@/lib/data";
 
 export function generateStaticParams() {
   return blogCategories.map((c) => ({ slug: c.slug }));
@@ -22,7 +23,8 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
   const category = blogCategories.find((c) => c.slug === slug);
   if (!category) notFound();
 
-  const posts = mockBlogPosts.filter((p) => p.categorySlug === slug);
+  const allPosts = await getAllBlogPosts();
+  const posts = allPosts.filter((p) => p.categorySlug === slug);
 
   return (
     <>

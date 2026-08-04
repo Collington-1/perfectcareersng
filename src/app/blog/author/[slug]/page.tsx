@@ -4,25 +4,28 @@ import { UserRound } from "lucide-react";
 import { Container, Section } from "@/components/layout/container";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { BlogCard } from "@/components/content/blog-card";
-import { mockAuthors, mockBlogPosts } from "@/lib/mock-data";
+import { getAllAuthors, getAllBlogPosts } from "@/lib/data";
 
-export function generateStaticParams() {
-  return mockAuthors.map((a) => ({ slug: a.slug }));
+export async function generateStaticParams() {
+  const authors = await getAllAuthors();
+  return authors.map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const author = mockAuthors.find((a) => a.slug === slug);
+  const authors = await getAllAuthors();
+  const author = authors.find((a) => a.slug === slug);
   if (!author) return {};
   return { title: `${author.name} — ${author.role} | PerfectCareers`, description: author.bio, alternates: { canonical: `/blog/author/${author.slug}` } };
 }
 
 export default async function AuthorPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const author = mockAuthors.find((a) => a.slug === slug);
+  const [authors, allPosts] = await Promise.all([getAllAuthors(), getAllBlogPosts()]);
+  const author = authors.find((a) => a.slug === slug);
   if (!author) notFound();
 
-  const posts = mockBlogPosts.filter((p) => p.authorSlug === author.slug);
+  const posts = allPosts.filter((p) => p.authorSlug === author.slug);
 
   return (
     <>

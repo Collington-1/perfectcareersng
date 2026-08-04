@@ -6,7 +6,8 @@ import { PageHero } from "@/components/layout/page-hero";
 import { AdSlot } from "@/components/layout/ad-slot";
 import { ScholarshipCard } from "@/components/content/scholarship-card";
 import { Button } from "@/components/ui/button";
-import { mockScholarships, scholarshipCategories } from "@/lib/mock-data";
+import { scholarshipCategories } from "@/lib/mock-data";
+import { getAllScholarships } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Scholarships for Nigerian Students — Fully & Partially Funded | PerfectCareers",
@@ -29,7 +30,8 @@ export default async function ScholarshipsPage({
 }) {
   const params = await searchParams;
 
-  const filtered = mockScholarships.filter((s) => {
+  const scholarships = await getAllScholarships();
+  const filtered = scholarships.filter((s) => {
     if (params.country) {
       const label = countrySlugMap[params.country];
       if (label) {
@@ -93,7 +95,7 @@ export default async function ScholarshipsPage({
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{filtered.length}</span> of {mockScholarships.length} scholarships
+              Showing <span className="font-semibold text-foreground">{filtered.length}</span> of {scholarships.length} scholarships
             </p>
             <Link href="/scholarships/categories" className="text-sm font-semibold text-secondary hover:text-secondary/80">
               Browse by country →

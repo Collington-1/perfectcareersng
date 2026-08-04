@@ -6,7 +6,7 @@ import { JobCard } from "@/components/content/job-card";
 import { ScholarshipCard } from "@/components/content/scholarship-card";
 import { GrantCard } from "@/components/content/grant-card";
 import { BlogCard } from "@/components/content/blog-card";
-import { mockJobs, mockScholarships, mockGrants, mockBlogPosts } from "@/lib/mock-data";
+import { getAllJobs, getAllScholarships, getAllGrants, getAllBlogPosts } from "@/lib/data";
 
 export const metadata: Metadata = { title: "Search | PerfectCareers" };
 
@@ -18,10 +18,17 @@ export default async function SearchPage({
   const { q = "" } = await searchParams;
   const query = q.toLowerCase().trim();
 
-  const jobs = query ? mockJobs.filter((j) => j.title.toLowerCase().includes(query) || j.company.toLowerCase().includes(query)) : [];
-  const scholarships = query ? mockScholarships.filter((s) => s.title.toLowerCase().includes(query) || s.university.toLowerCase().includes(query)) : [];
-  const grants = query ? mockGrants.filter((g) => g.title.toLowerCase().includes(query) || g.provider.toLowerCase().includes(query)) : [];
-  const posts = query ? mockBlogPosts.filter((p) => p.title.toLowerCase().includes(query) || p.excerpt.toLowerCase().includes(query)) : [];
+  const [allJobs, allScholarships, allGrants, allPosts] = await Promise.all([
+    getAllJobs(),
+    getAllScholarships(),
+    getAllGrants(),
+    getAllBlogPosts(),
+  ]);
+
+  const jobs = query ? allJobs.filter((j) => j.title.toLowerCase().includes(query) || j.company.toLowerCase().includes(query)) : [];
+  const scholarships = query ? allScholarships.filter((s) => s.title.toLowerCase().includes(query) || s.university.toLowerCase().includes(query)) : [];
+  const grants = query ? allGrants.filter((g) => g.title.toLowerCase().includes(query) || g.provider.toLowerCase().includes(query)) : [];
+  const posts = query ? allPosts.filter((p) => p.title.toLowerCase().includes(query) || p.excerpt.toLowerCase().includes(query)) : [];
 
   const totalResults = jobs.length + scholarships.length + grants.length + posts.length;
 

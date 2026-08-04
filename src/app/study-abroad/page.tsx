@@ -8,8 +8,8 @@ import { ScholarshipCard } from "@/components/content/scholarship-card";
 import { BlogCard } from "@/components/content/blog-card";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { mockScholarships, mockBlogPosts } from "@/lib/mock-data";
 import { whatsappLink } from "@/lib/site-config";
+import { getAllScholarships, getAllBlogPosts } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Study Abroad Guide for Nigerians | PerfectCareers",
@@ -23,9 +23,10 @@ const destinations = [
   { country: "Germany", note: "Low or no tuition at public universities, plus DAAD-style development funding." },
 ];
 
-export default function StudyAbroadPage() {
-  const internationalScholarships = mockScholarships.filter((s) => s.country !== "Nigeria").slice(0, 6);
-  const studyAbroadPosts = mockBlogPosts.filter((p) => p.categorySlug === "study-abroad");
+export default async function StudyAbroadPage() {
+  const [scholarships, blogPosts] = await Promise.all([getAllScholarships(), getAllBlogPosts()]);
+  const internationalScholarships = scholarships.filter((s) => s.country !== "Nigeria").slice(0, 6);
+  const studyAbroadPosts = blogPosts.filter((p) => p.categorySlug === "study-abroad");
 
   return (
     <>

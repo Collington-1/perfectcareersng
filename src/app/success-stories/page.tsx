@@ -4,15 +4,16 @@ import { Container, Section } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { mockTestimonials } from "@/lib/mock-data";
 import { whatsappLink } from "@/lib/site-config";
+import { getAllTestimonials } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Success Stories | PerfectCareers",
   description: "Real outcomes from Nigerians who used PerfectCareers to land jobs, win scholarships and secure business grants.",
 };
 
-export default function SuccessStoriesPage() {
+export default async function SuccessStoriesPage() {
+  const testimonials = await getAllTestimonials();
   return (
     <>
       <PageHero
@@ -24,7 +25,7 @@ export default function SuccessStoriesPage() {
       <Section className="pt-0">
         <Container>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {mockTestimonials.map((t) => (
+            {testimonials.map((t) => (
               <Card key={t.name} className="p-6">
                 <div className="flex gap-0.5 text-secondary">
                   {Array.from({ length: t.rating }).map((_, i) => (

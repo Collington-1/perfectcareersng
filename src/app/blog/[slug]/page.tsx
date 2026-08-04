@@ -10,29 +10,33 @@ import { ShareButtons } from "@/components/content/share-buttons";
 import { BlogCard } from "@/components/content/blog-card";
 import { Badge } from "@/components/ui/badge";
 import { formatDeadline } from "@/lib/format";
-import { mockBlogPosts, mockAuthors, blogCategoryImage } from "@/lib/mock-data";
+import { blogCategoryImage } from "@/lib/mock-data";
+import { getAllBlogPosts, getAllAuthors } from "@/lib/data";
 import { extractHeadings, injectHeadingIds } from "@/lib/toc";
 
-export function generateStaticParams() {
-  return mockBlogPosts.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  const posts = await getAllBlogPosts();
+  return posts.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = mockBlogPosts.find((p) => p.slug === slug);
+  const posts = await getAllBlogPosts();
+  const post = posts.find((p) => p.slug === slug);
   if (!post) return {};
   return { title: `${post.title} | PerfectCareers Blog`, description: post.excerpt, alternates: { canonical: `/blog/${post.slug}` } };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = mockBlogPosts.find((p) => p.slug === slug);
+  const [posts, authors] = await Promise.all([getAllBlogPosts(), getAllAuthors()]);
+  const post = posts.find((p) => p.slug === slug);
   if (!post) notFound();
 
-  const author = mockAuthors.find((a) => a.slug === post.authorSlug);
+  const author = authors.find((a) => a.slug === post.authorSlug);
   const headings = extractHeadings(post.contentHtml);
   const html = injectHeadingIds(post.contentHtml);
-  const related = mockBlogPosts.filter((p) => p.slug !== post.slug && p.categorySlug === post.categorySlug).slice(0, 3);
+  const related = posts.filter((p) => p.slug !== post.slug && p.categorySlug === post.categorySlug).slice(0, 3);
 
   const jsonLd = {
     "@context": "https://schema.org",

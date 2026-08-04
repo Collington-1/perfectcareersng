@@ -7,7 +7,8 @@ import { PageHero } from "@/components/layout/page-hero";
 import { AdSlot } from "@/components/layout/ad-slot";
 import { BlogCard } from "@/components/content/blog-card";
 import { Badge } from "@/components/ui/badge";
-import { mockBlogPosts, blogCategories, blogCategoryImage } from "@/lib/mock-data";
+import { blogCategories, blogCategoryImage } from "@/lib/mock-data";
+import { getAllBlogPosts } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Career Advice & Blog — CV, LinkedIn, Interview & Study Abroad Tips | PerfectCareers",
@@ -22,9 +23,10 @@ export default async function BlogPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const params = await searchParams;
+  const allPosts = await getAllBlogPosts();
   const posts = params.q
-    ? mockBlogPosts.filter((p) => p.title.toLowerCase().includes(params.q!.toLowerCase()))
-    : mockBlogPosts;
+    ? allPosts.filter((p) => p.title.toLowerCase().includes(params.q!.toLowerCase()))
+    : allPosts;
 
   const [featured, ...rest] = posts;
 

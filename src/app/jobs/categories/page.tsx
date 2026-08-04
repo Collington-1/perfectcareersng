@@ -4,7 +4,8 @@ import { Briefcase, ArrowRight } from "lucide-react";
 import { Container, Section } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
 import { Card } from "@/components/ui/card";
-import { jobCategories, mockJobs } from "@/lib/mock-data";
+import { jobCategories } from "@/lib/mock-data";
+import { getAllJobs } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Job Categories in Nigeria | PerfectCareers",
@@ -12,7 +13,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/jobs/categories" },
 };
 
-export default function JobCategoriesPage() {
+export default async function JobCategoriesPage() {
+  const jobs = await getAllJobs();
   return (
     <>
       <PageHero
@@ -26,7 +28,7 @@ export default function JobCategoriesPage() {
         <Container>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {jobCategories.map((category) => {
-              const count = mockJobs.filter((j) => j.category === category.label).length;
+              const count = jobs.filter((j) => j.category === category.label).length;
               return (
                 <Card key={category.slug} className="p-0">
                   <Link

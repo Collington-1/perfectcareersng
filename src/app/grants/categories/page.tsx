@@ -4,7 +4,8 @@ import { HandCoins, ArrowRight } from "lucide-react";
 import { Container, Section } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
 import { Card } from "@/components/ui/card";
-import { grantCategories, mockGrants } from "@/lib/mock-data";
+import { grantCategories } from "@/lib/mock-data";
+import { getAllGrants } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Grant Categories by Industry | PerfectCareers",
@@ -12,7 +13,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/grants/categories" },
 };
 
-export default function GrantCategoriesPage() {
+export default async function GrantCategoriesPage() {
+  const grants = await getAllGrants();
   return (
     <>
       <PageHero
@@ -26,7 +28,7 @@ export default function GrantCategoriesPage() {
         <Container>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {grantCategories.map((category) => {
-              const count = mockGrants.filter((g) => g.industry.toLowerCase().includes(category.label.split(" ")[0].toLowerCase())).length;
+              const count = grants.filter((g) => g.industry.toLowerCase().includes(category.label.split(" ")[0].toLowerCase())).length;
               return (
                 <Card key={category.slug} className="p-0">
                   <Link href={`/grants?industry=${category.slug}`} className="group flex items-center justify-between gap-3 p-5 hover:text-primary">

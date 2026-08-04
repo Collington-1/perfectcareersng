@@ -10,26 +10,29 @@ import { ScholarshipCard } from "@/components/content/scholarship-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDeadline } from "@/lib/format";
-import { mockScholarships } from "@/lib/mock-data";
 import { whatsappLink } from "@/lib/site-config";
+import { getAllScholarships } from "@/lib/data";
 
-export function generateStaticParams() {
-  return mockScholarships.map((s) => ({ slug: s.slug }));
+export async function generateStaticParams() {
+  const scholarships = await getAllScholarships();
+  return scholarships.map((s) => ({ slug: s.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const s = mockScholarships.find((x) => x.slug === slug);
+  const scholarships = await getAllScholarships();
+  const s = scholarships.find((x) => x.slug === slug);
   if (!s) return {};
   return { title: `${s.title} — ${s.country} | PerfectCareers`, description: s.description, alternates: { canonical: `/scholarships/${s.slug}` } };
 }
 
 export default async function ScholarshipDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const scholarship = mockScholarships.find((s) => s.slug === slug);
+  const scholarships = await getAllScholarships();
+  const scholarship = scholarships.find((s) => s.slug === slug);
   if (!scholarship) notFound();
 
-  const related = mockScholarships.filter((s) => s.slug !== scholarship.slug && s.country === scholarship.country).slice(0, 3);
+  const related = scholarships.filter((s) => s.slug !== scholarship.slug && s.country === scholarship.country).slice(0, 3);
 
   return (
     <>

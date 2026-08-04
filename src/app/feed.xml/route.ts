@@ -1,4 +1,4 @@
-import { mockBlogPosts } from "@/lib/mock-data";
+import { getAllBlogPosts } from "@/lib/data";
 import { siteConfig } from "@/lib/site-config";
 
 function escapeXml(text: string) {
@@ -6,7 +6,8 @@ function escapeXml(text: string) {
 }
 
 export async function GET() {
-  const items = mockBlogPosts
+  const posts = await getAllBlogPosts();
+  const items = posts
     .slice()
     .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
     .map(

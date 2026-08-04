@@ -193,10 +193,11 @@ async function main() {
     }
     await prisma.scholarship.upsert({
       where: { slug: s.slug },
-      update: {},
+      update: { description: s.description },
       create: {
         slug: s.slug,
         title: s.title,
+        description: s.description,
         country: s.country,
         university: s.university,
         amount: s.amount,
@@ -228,10 +229,11 @@ async function main() {
     }
     await prisma.grant.upsert({
       where: { slug: g.slug },
-      update: {},
+      update: { description: g.description },
       create: {
         slug: g.slug,
         title: g.title,
+        description: g.description,
         provider: g.provider,
         fundingAmount: g.fundingAmount,
         eligibility: g.eligibility,

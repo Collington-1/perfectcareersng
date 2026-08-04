@@ -10,16 +10,18 @@ import { JobCard } from "@/components/content/job-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatSalary, formatDeadline, formatRelativeDate } from "@/lib/format";
-import { mockJobs } from "@/lib/mock-data";
-import { siteConfig, whatsappLink } from "@/lib/site-config";
+import { whatsappLink } from "@/lib/site-config";
+import { getAllJobs } from "@/lib/data";
 
-export function generateStaticParams() {
-  return mockJobs.map((job) => ({ slug: job.slug }));
+export async function generateStaticParams() {
+  const jobs = await getAllJobs();
+  return jobs.map((job) => ({ slug: job.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const job = mockJobs.find((j) => j.slug === slug);
+  const jobs = await getAllJobs();
+  const job = jobs.find((j) => j.slug === slug);
   if (!job) return {};
   return {
     title: `${job.title} at ${job.company} — ${job.city} | PerfectCareers`,
@@ -30,10 +32,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function JobDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const job = mockJobs.find((j) => j.slug === slug);
+  const jobs = await getAllJobs();
+  const job = jobs.find((j) => j.slug === slug);
   if (!job) notFound();
 
-  const related = mockJobs.filter((j) => j.slug !== job.slug && j.category === job.category).slice(0, 3);
+  const related = jobs.filter((j) => j.slug !== job.slug && j.category === job.category).slice(0, 3);
 
   const jsonLd = {
     "@context": "https://schema.org",

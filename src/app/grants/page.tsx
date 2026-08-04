@@ -6,7 +6,8 @@ import { PageHero } from "@/components/layout/page-hero";
 import { AdSlot } from "@/components/layout/ad-slot";
 import { GrantCard } from "@/components/content/grant-card";
 import { Button } from "@/components/ui/button";
-import { mockGrants, grantCategories } from "@/lib/mock-data";
+import { grantCategories } from "@/lib/mock-data";
+import { getAllGrants } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Business Grants in Nigeria — Funding for Founders | PerfectCareers",
@@ -23,7 +24,8 @@ export default async function GrantsPage({
   const params = await searchParams;
   const industryLabel = grantCategories.find((c) => c.slug === params.industry)?.label;
 
-  const filtered = mockGrants.filter((g) => {
+  const grants = await getAllGrants();
+  const filtered = grants.filter((g) => {
     if (industryLabel && !g.industry.toLowerCase().includes(industryLabel.split(" ")[0].toLowerCase())) return false;
     if (params.q) {
       const q = params.q.toLowerCase();
@@ -72,7 +74,7 @@ export default async function GrantsPage({
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{filtered.length}</span> of {mockGrants.length} grants
+              Showing <span className="font-semibold text-foreground">{filtered.length}</span> of {grants.length} grants
             </p>
             <Link href="/grants/categories" className="text-sm font-semibold text-primary hover:text-primary/80">
               Browse by industry →

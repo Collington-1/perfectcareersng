@@ -1,9 +1,10 @@
 import { Container, Section } from "@/components/layout/container";
 import { SectionHeading } from "@/components/home/section-heading";
 import { BlogCard } from "@/components/content/blog-card";
-import { mockBlogPosts } from "@/lib/mock-data";
+import { getAllBlogPosts } from "@/lib/data";
 
-export function LatestBlog() {
+export async function LatestBlog() {
+  const posts = await getAllBlogPosts();
   return (
     <Section className="bg-white">
       <Container>
@@ -15,7 +16,7 @@ export function LatestBlog() {
         />
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {mockBlogPosts.map((post) => (
+          {posts.slice(0, 3).map((post) => (
             <BlogCard key={post.slug} post={post} />
           ))}
         </div>

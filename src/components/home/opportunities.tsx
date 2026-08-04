@@ -4,9 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JobCard } from "@/components/content/job-card";
 import { ScholarshipCard } from "@/components/content/scholarship-card";
 import { GrantCard } from "@/components/content/grant-card";
-import { mockJobs, mockGrants, mockScholarships } from "@/lib/mock-data";
+import { getAllJobs, getAllGrants, getAllScholarships } from "@/lib/data";
 
-export function Opportunities() {
+export async function Opportunities() {
+  const [jobs, scholarships, grants] = await Promise.all([getAllJobs(), getAllScholarships(), getAllGrants()]);
   return (
     <Section className="bg-white">
       <Container>
@@ -30,17 +31,17 @@ export function Opportunities() {
           </TabsList>
 
           <TabsContent value="jobs" className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {mockJobs.slice(0, 6).map((job) => (
+            {jobs.slice(0, 6).map((job) => (
               <JobCard key={job.slug} job={job} />
             ))}
           </TabsContent>
           <TabsContent value="scholarships" className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {mockScholarships.slice(0, 6).map((scholarship) => (
+            {scholarships.slice(0, 6).map((scholarship) => (
               <ScholarshipCard key={scholarship.slug} scholarship={scholarship} />
             ))}
           </TabsContent>
           <TabsContent value="grants" className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {mockGrants.slice(0, 6).map((grant) => (
+            {grants.slice(0, 6).map((grant) => (
               <GrantCard key={grant.slug} grant={grant} />
             ))}
           </TabsContent>

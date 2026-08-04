@@ -4,7 +4,8 @@ import { GraduationCap, ArrowRight } from "lucide-react";
 import { Container, Section } from "@/components/layout/container";
 import { PageHero } from "@/components/layout/page-hero";
 import { Card } from "@/components/ui/card";
-import { scholarshipCategories, mockScholarships } from "@/lib/mock-data";
+import { scholarshipCategories } from "@/lib/mock-data";
+import { getAllScholarships } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Scholarship Categories by Country | PerfectCareers",
@@ -21,7 +22,8 @@ const countryGroups: Record<string, string[]> = {
   nigeria: ["Nigeria"],
 };
 
-export default function ScholarshipCategoriesPage() {
+export default async function ScholarshipCategoriesPage() {
+  const scholarships = await getAllScholarships();
   return (
     <>
       <PageHero
@@ -36,7 +38,7 @@ export default function ScholarshipCategoriesPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {scholarshipCategories.map((category) => {
               const countries = countryGroups[category.slug] ?? [];
-              const count = mockScholarships.filter((s) => countries.includes(s.country)).length;
+              const count = scholarships.filter((s) => countries.includes(s.country)).length;
               return (
                 <Card key={category.slug} className="p-0">
                   <Link href={`/scholarships?country=${category.slug}`} className="group flex items-center justify-between gap-3 p-5 hover:text-secondary">

@@ -133,9 +133,10 @@ model Job {
 }
 
 model Scholarship {
-  id    String @id @default(cuid())
-  title String
-  slug  String @unique
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  description String?
 
   country    String
   university String
@@ -171,10 +172,11 @@ model Scholarship {
 }
 
 model Grant {
-  id       String @id @default(cuid())
-  title    String
-  slug     String @unique
-  provider String
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  provider    String
+  description String?
 
   fundingAmount String?
   eligibility   Json // string[]
