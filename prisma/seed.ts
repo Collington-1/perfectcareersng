@@ -2,6 +2,7 @@
 // into the real database, so the site becomes DB-backed without any
 // visible change. Safe to re-run — every model is upserted by slug.
 import "dotenv/config";
+import bcrypt from "bcryptjs";
 import { prisma } from "../src/lib/prisma";
 import {
   mockJobs,
@@ -298,6 +299,22 @@ async function main() {
     }
   }
   console.log(`Seeded ${testimonialCount} testimonials.`);
+
+  // --- First admin user (bootstrap only, never overwrites an existing one) ---
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
+  const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+  if (bootstrapEmail && bootstrapPassword) {
+    const existingAdmin = await prisma.adminUser.findUnique({ where: { email: bootstrapEmail.toLowerCase() } });
+    if (!existingAdmin) {
+      const passwordHash = await bcrypt.hash(bootstrapPassword, 12);
+      await prisma.adminUser.create({
+        data: { email: bootstrapEmail.toLowerCase(), passwordHash, name: "Okezie Collington" },
+      });
+      console.log(`Created admin user ${bootstrapEmail}.`);
+    } else {
+      console.log("Admin user already exists, skipping.");
+    }
+  }
 }
 
 main()

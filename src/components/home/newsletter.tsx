@@ -5,7 +5,7 @@ import { Mail } from "lucide-react";
 import { Container, Section } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { subscribeToNewsletter, type NewsletterState } from "@/app/actions/newsletter";
+import { subscribeToNewsletter, type NewsletterState } from "@/app/(site)/actions/newsletter";
 
 const initialState: NewsletterState = { status: "idle" };
 
