@@ -7,10 +7,10 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
   if (!session?.user) redirect("/admin/login");
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full flex-col lg:flex-row">
       <AdminSidebar userName={session.user.name ?? session.user.email ?? "Admin"} />
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8">{children}</div>
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</div>
       </main>
     </div>
   );

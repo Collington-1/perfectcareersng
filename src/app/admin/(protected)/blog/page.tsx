@@ -16,7 +16,7 @@ export default async function AdminBlogPage() {
     <div>
       <AdminPageHeader title="Blog Posts" description={`${posts.length} published`} newHref="/admin/blog/new" newLabel="New Post" />
 
-      <div className="mt-6 overflow-hidden rounded-2xl bg-white ring-1 ring-border">
+      <div className="mt-6 overflow-x-auto rounded-2xl bg-white ring-1 ring-border">
         <table className="w-full text-left text-sm">
           <thead className="bg-muted/40 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             <tr>
