@@ -4,6 +4,7 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendMail, emailShell } from "@/lib/mail";
@@ -49,16 +50,18 @@ export async function inviteAdmin(_prev: AdminFormState, formData: FormData): Pr
     },
   });
 
-  await sendMail({
-    to: email,
-    subject: `You've been added as an admin on ${siteConfig.name}`,
-    html: emailShell(
-      "You're in!",
-      `<p>Hi ${parsed.data.name},</p><p>You've been given admin access to manage content on ${siteConfig.name}. Click below to set your password and log in. This link expires in 7 days.</p>`,
-      "Set Your Password",
-      `${siteConfig.siteUrl}/admin/reset-password?token=${token}`
-    ),
-  });
+  after(() =>
+    sendMail({
+      to: email,
+      subject: `You've been added as an admin on ${siteConfig.name}`,
+      html: emailShell(
+        "You're in!",
+        `<p>Hi ${parsed.data.name},</p><p>You've been given admin access to manage content on ${siteConfig.name}. Click below to set your password and log in. This link expires in 7 days.</p>`,
+        "Set Your Password",
+        `${siteConfig.siteUrl}/admin/reset-password?token=${token}`
+      ),
+    }).catch((error) => console.error("Failed to send admin invite email:", error))
+  );
 
   revalidatePath("/admin/users");
   return { status: "success", message: `Invite sent to ${email}.` };

@@ -3,6 +3,7 @@
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendMail, emailShell } from "@/lib/mail";
@@ -28,16 +29,20 @@ export async function requestPasswordReset(_prev: ForgotPasswordState, formData:
       data: { resetToken: token, resetTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000) },
     });
 
-    await sendMail({
-      to: user.email,
-      subject: `Reset your ${siteConfig.name} admin password`,
-      html: emailShell(
-        "Reset your password",
-        `<p>Hi ${user.name},</p><p>We received a request to reset your admin password. This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>`,
-        "Reset Password",
-        `${siteConfig.siteUrl}/admin/reset-password?token=${token}`
-      ),
-    });
+    // Gmail SMTP takes 8-16s — send after the response goes out so the
+    // user isn't stuck waiting, and so slow SMTP can't trip a function timeout.
+    after(() =>
+      sendMail({
+        to: user.email,
+        subject: `Reset your ${siteConfig.name} admin password`,
+        html: emailShell(
+          "Reset your password",
+          `<p>Hi ${user.name},</p><p>We received a request to reset your admin password. This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>`,
+          "Reset Password",
+          `${siteConfig.siteUrl}/admin/reset-password?token=${token}`
+        ),
+      }).catch((error) => console.error("Failed to send password reset email:", error))
+    );
   }
 
   return { status: "success", message: "If that email has an admin account, a reset link has been sent to it." };
