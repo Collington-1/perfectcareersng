@@ -282,14 +282,19 @@ model WhatsAppLead {
   createdAt DateTime @default(now())
 }
 
-// Admin-only auth for v1 (NextAuth credentials provider, added in the
-// Admin Dashboard phase).
+// Admin auth (NextAuth credentials provider). role is "SUPER_ADMIN" (can
+// invite/remove other admins) or "ADMIN" (content access only).
 model AdminUser {
   id           String @id @default(cuid())
   email        String @unique
   passwordHash String
   name         String
   role         String @default("ADMIN")
+
+  // Used for both "forgot password" and "you've been invited, set your
+  // password" flows — both just email a time-limited link.
+  resetToken          String?   @unique
+  resetTokenExpiresAt DateTime?
 
   createdAt DateTime @default(now())
 }

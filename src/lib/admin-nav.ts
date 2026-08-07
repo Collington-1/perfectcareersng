@@ -9,9 +9,10 @@ import {
   Mail,
   MessageSquare,
   Users,
+  ShieldCheck,
 } from "lucide-react";
 
-export type AdminNavItem = { label: string; href: string; icon: LucideIcon };
+export type AdminNavItem = { label: string; href: string; icon: LucideIcon; superAdminOnly?: boolean };
 
 export const adminNav: AdminNavItem[] = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -23,4 +24,5 @@ export const adminNav: AdminNavItem[] = [
   { label: "Newsletter Subscribers", href: "/admin/newsletter", icon: Mail },
   { label: "Contact Messages", href: "/admin/contact-messages", icon: MessageSquare },
   { label: "WhatsApp Leads", href: "/admin/whatsapp-leads", icon: Users },
+  { label: "Admin Users & Access", href: "/admin/users", icon: ShieldCheck, superAdminOnly: true },
 ];

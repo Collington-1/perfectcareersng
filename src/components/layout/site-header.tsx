@@ -1,5 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
 import { primaryNav } from "@/lib/nav-links";
@@ -22,6 +26,15 @@ import {
 } from "@/components/ui/sheet";
 
 export function SiteHeader() {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Close the mobile drawer whenever the route changes — covers link
+  // clicks, browser back/forward, and any other navigation source.
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname]);
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/85 backdrop-blur-md supports-backdrop-filter:bg-background/70">
       <Container className="flex h-18 items-center justify-between gap-4">
@@ -83,7 +96,7 @@ export function SiteHeader() {
           </Button>
         </div>
 
-        <Sheet>
+        <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu">
               <Menu className="size-5" />

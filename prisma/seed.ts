@@ -300,7 +300,9 @@ async function main() {
   }
   console.log(`Seeded ${testimonialCount} testimonials.`);
 
-  // --- First admin user (bootstrap only, never overwrites an existing one) ---
+  // --- First admin user (bootstrap only, never overwrites an existing password) ---
+  // Always SUPER_ADMIN — this is the founder's account, the only one that
+  // can invite/remove other admins.
   const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
   const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
   if (bootstrapEmail && bootstrapPassword) {
@@ -308,11 +310,16 @@ async function main() {
     if (!existingAdmin) {
       const passwordHash = await bcrypt.hash(bootstrapPassword, 12);
       await prisma.adminUser.create({
-        data: { email: bootstrapEmail.toLowerCase(), passwordHash, name: "Okezie Collington" },
+        data: { email: bootstrapEmail.toLowerCase(), passwordHash, name: "Okezie Collington", role: "SUPER_ADMIN" },
       });
       console.log(`Created admin user ${bootstrapEmail}.`);
     } else {
-      console.log("Admin user already exists, skipping.");
+      if (existingAdmin.role !== "SUPER_ADMIN") {
+        await prisma.adminUser.update({ where: { id: existingAdmin.id }, data: { role: "SUPER_ADMIN" } });
+        console.log(`Promoted ${bootstrapEmail} to SUPER_ADMIN.`);
+      } else {
+        console.log("Admin user already exists, skipping.");
+      }
     }
   }
 }

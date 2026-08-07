@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { AuthError } from "next-auth";
 import { signIn } from "@/lib/auth";
 import { siteConfig } from "@/lib/site-config";
@@ -26,9 +27,9 @@ async function loginAction(formData: FormData) {
 export default async function AdminLoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; reset?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, reset } = await searchParams;
 
   return (
     <div className="flex min-h-full items-center justify-center px-4 py-16">
@@ -40,6 +41,11 @@ export default async function AdminLoginPage({
         {error && (
           <p className="mt-4 rounded-lg bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
             Invalid email or password.
+          </p>
+        )}
+        {reset && (
+          <p className="mt-4 rounded-lg bg-primary/10 px-3 py-2 text-center text-sm text-primary">
+            Password updated — sign in with your new password.
           </p>
         )}
 
@@ -56,6 +62,13 @@ export default async function AdminLoginPage({
             Sign In
           </Button>
         </form>
+
+        <Link
+          href="/admin/forgot-password"
+          className="mt-4 block text-center text-sm text-muted-foreground hover:text-primary"
+        >
+          Forgot password?
+        </Link>
       </div>
     </div>
   );

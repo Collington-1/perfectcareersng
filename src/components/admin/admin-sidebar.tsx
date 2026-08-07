@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -11,10 +12,12 @@ import { signOutAction } from "@/lib/actions/admin-auth";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
-function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function NavLinks({ pathname, isSuperAdmin, onNavigate }: { pathname: string; isSuperAdmin: boolean; onNavigate?: () => void }) {
   return (
     <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-      {adminNav.map((item) => {
+      {adminNav
+        .filter((item) => !item.superAdminOnly || isSuperAdmin)
+        .map((item) => {
         const isActive = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
         return (
           <Link
@@ -57,8 +60,14 @@ function UserFooter({ userName }: { userName: string }) {
   );
 }
 
-export function AdminSidebar({ userName }: { userName: string }) {
+export function AdminSidebar({ userName, role }: { userName: string; role: string }) {
   const pathname = usePathname();
+  const isSuperAdmin = role === "SUPER_ADMIN";
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname]);
 
   return (
     <>
@@ -67,7 +76,7 @@ export function AdminSidebar({ userName }: { userName: string }) {
         <div className="flex h-16 items-center border-b border-border px-5">
           <Image src={siteConfig.logo.primary} alt={siteConfig.name} width={130} height={34} className="h-8 w-auto" />
         </div>
-        <NavLinks pathname={pathname} />
+        <NavLinks pathname={pathname} isSuperAdmin={isSuperAdmin} />
         <UserFooter userName={userName} />
       </aside>
 
@@ -76,7 +85,7 @@ export function AdminSidebar({ userName }: { userName: string }) {
         <Link href="/admin" className="flex items-center">
           <Image src={siteConfig.logo.primary} alt={siteConfig.name} width={120} height={32} className="h-7 w-auto" />
         </Link>
-        <Sheet>
+        <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="Open admin menu">
               <Menu className="size-5" />
@@ -87,7 +96,7 @@ export function AdminSidebar({ userName }: { userName: string }) {
             <div className="flex h-16 items-center border-b border-border px-5">
               <Image src={siteConfig.logo.primary} alt={siteConfig.name} width={130} height={34} className="h-8 w-auto" />
             </div>
-            <NavLinks pathname={pathname} />
+            <NavLinks pathname={pathname} isSuperAdmin={isSuperAdmin} onNavigate={() => setMobileNavOpen(false)} />
             <UserFooter userName={userName} />
           </SheetContent>
         </Sheet>
