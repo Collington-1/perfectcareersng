@@ -69,6 +69,12 @@ export default async function AdminLoginPage({
         >
           Forgot password?
         </Link>
+        <Link
+          href="/admin/request-access"
+          className="mt-1.5 block text-center text-sm text-muted-foreground hover:text-primary"
+        >
+          Want to help manage content? Request access
+        </Link>
       </div>
     </div>
   );

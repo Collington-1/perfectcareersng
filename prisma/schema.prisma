@@ -282,6 +282,20 @@ model WhatsAppLead {
   createdAt DateTime @default(now())
 }
 
+// Self-service "request admin access" signups. The super admin gets emailed
+// on each new request and approves/denies from /admin/users; approving
+// creates the AdminUser and emails the requester a set-password link,
+// reusing the same flow as a direct invite.
+model AdminAccessRequest {
+  id      String  @id @default(cuid())
+  name    String
+  email   String
+  message String?
+  status  String  @default("PENDING") // PENDING | APPROVED | DENIED
+
+  createdAt DateTime @default(now())
+}
+
 // Admin auth (NextAuth credentials provider). role is "SUPER_ADMIN" (can
 // invite/remove other admins) or "ADMIN" (content access only).
 model AdminUser {

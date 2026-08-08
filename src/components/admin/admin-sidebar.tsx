@@ -38,13 +38,13 @@ function NavLinks({ pathname, isSuperAdmin, onNavigate }: { pathname: string; is
   );
 }
 
-function UserFooter({ userName }: { userName: string }) {
+function UserFooter({ userName, isSuperAdmin }: { userName: string; isSuperAdmin: boolean }) {
   return (
     <div className="border-t border-border p-3">
       <div className="flex items-center justify-between gap-2 rounded-lg px-3 py-2">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-foreground">{userName}</p>
-          <p className="text-xs text-muted-foreground">Administrator</p>
+          <p className="text-xs text-muted-foreground">{isSuperAdmin ? "Main Admin" : "Admin"}</p>
         </div>
         <form action={signOutAction}>
           <button
@@ -77,7 +77,7 @@ export function AdminSidebar({ userName, role }: { userName: string; role: strin
           <Image src={siteConfig.logo.primary} alt={siteConfig.name} width={130} height={34} className="h-8 w-auto" />
         </div>
         <NavLinks pathname={pathname} isSuperAdmin={isSuperAdmin} />
-        <UserFooter userName={userName} />
+        <UserFooter userName={userName} isSuperAdmin={isSuperAdmin} />
       </aside>
 
       {/* Mobile/tablet: top bar with a slide-in drawer */}
@@ -97,7 +97,7 @@ export function AdminSidebar({ userName, role }: { userName: string; role: strin
               <Image src={siteConfig.logo.primary} alt={siteConfig.name} width={130} height={34} className="h-8 w-auto" />
             </div>
             <NavLinks pathname={pathname} isSuperAdmin={isSuperAdmin} onNavigate={() => setMobileNavOpen(false)} />
-            <UserFooter userName={userName} />
+            <UserFooter userName={userName} isSuperAdmin={isSuperAdmin} />
           </SheetContent>
         </Sheet>
       </div>
