@@ -29,6 +29,10 @@ export const siteConfig = {
     facebook: "https://facebook.com/perfectcareersng",
     linkedin: "https://linkedin.com/company/perfectcareersng",
   },
+  community: {
+    whatsappGroup: "https://chat.whatsapp.com/DTFcyaKviBv3kZbfUQhuu7",
+    telegram: "https://t.me/perfectcareersng",
+  },
   founder: {
     name: "Okezie Collington",
     founded: "January 2026",

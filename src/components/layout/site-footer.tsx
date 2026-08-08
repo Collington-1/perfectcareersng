@@ -9,9 +9,13 @@ import {
   InstagramIcon,
   LinkedInIcon,
   XIcon,
+  WhatsAppIcon,
+  TelegramIcon,
 } from "@/components/icons/social-icons";
 
 const socialLinks = [
+  { label: "WhatsApp Group", href: siteConfig.community.whatsappGroup, icon: WhatsAppIcon },
+  { label: "Telegram", href: siteConfig.community.telegram, icon: TelegramIcon },
   { label: "Instagram", href: siteConfig.social.instagram, icon: InstagramIcon },
   { label: "X", href: siteConfig.social.twitter, icon: XIcon },
   { label: "Facebook", href: siteConfig.social.facebook, icon: FacebookIcon },

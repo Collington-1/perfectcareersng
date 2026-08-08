@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/site-config";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { WhatsAppButton } from "@/components/layout/whatsapp-button";
+import { CommunityLinks } from "@/components/layout/community-links";
 
 const bodyFont = Inter({
   variable: "--font-body",
@@ -84,6 +85,7 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
         <SiteFooter />
         <WhatsAppButton />
+        <CommunityLinks />
       </body>
     </html>
   );
