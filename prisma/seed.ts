@@ -25,6 +25,60 @@ function slugify(value: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+function escapeHtml(value: string) {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function listSectionHtml(heading: string, items: string[]) {
+  if (!items.length) return "";
+  return `<h2>${heading}</h2><ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+}
+
+// Jobs/Scholarships/Grants are now authored as one Tiptap rich-text field
+// instead of separate structured fields. mock-data.ts still keeps the old
+// structured shape (it's good source content), so the seed script combines
+// it into contentHtml here, in the exact section order requested.
+function jobContentHtml(job: (typeof mockJobs)[number]) {
+  let html = `<h2>Description</h2><p>${escapeHtml(job.description)}</p>`;
+  if (job.qualification) html += `<h2>Qualifications</h2><p>${escapeHtml(job.qualification)}</p>`;
+  html += listSectionHtml("Requirements", job.requirements);
+  html += listSectionHtml("Responsibilities", job.responsibilities);
+  return html;
+}
+
+function scholarshipContentHtml(s: (typeof mockScholarships)[number]) {
+  let html = `<h2>Description</h2><p>${escapeHtml(s.description)}</p>`;
+  html += listSectionHtml("Requirements", s.requirements);
+  html += listSectionHtml("Eligibility", s.eligibility);
+  html += listSectionHtml("Documents Needed", s.documents);
+  return html;
+}
+
+function grantContentHtml(g: (typeof mockGrants)[number]) {
+  let html = `<h2>Description</h2><p>${escapeHtml(g.description)}</p>`;
+  html += listSectionHtml("Eligibility", g.eligibility);
+  html += listSectionHtml("Requirements", g.requirements);
+  return html;
+}
+
+function jobLocation(job: (typeof mockJobs)[number]) {
+  if (job.workMode === "Remote" || job.city === "Remote") return "Remote";
+  return [job.city, job.state && job.state !== "—" ? job.state : null, job.country].filter(Boolean).join(", ");
+}
+
+function jobSalary(job: (typeof mockJobs)[number]) {
+  if (!job.salaryMin && !job.salaryMax) return null;
+  const fmt = (n: number) => new Intl.NumberFormat("en-NG").format(n);
+  const symbol = job.currency === "NGN" ? "₦" : `${job.currency} `;
+  if (job.salaryMin && job.salaryMax) return `${symbol}${fmt(job.salaryMin)} - ${symbol}${fmt(job.salaryMax)} / month`;
+  return `${symbol}${fmt((job.salaryMin ?? job.salaryMax)!)} / month`;
+}
+
+// Placeholder Tiptap doc — the rich text editor populates real editable
+// JSON the first time an admin opens this record; contentHtml is
+// authoritative for public rendering until then.
+const EMPTY_TIPTAP_DOC = { type: "doc", content: [] };
+
 // mockJob.category / mockScholarship.country / mockGrant.industry are
 // display labels, not the category slugs — map them explicitly rather
 // than guessing, since a few don't match 1:1 (e.g. "Logistics" vs the
@@ -157,21 +211,15 @@ async function main() {
       create: {
         slug: job.slug,
         title: job.title,
-        description: job.description,
+        content: EMPTY_TIPTAP_DOC,
+        contentHtml: jobContentHtml(job),
         companyId: compId,
         categoryId: catId,
         employmentType: EMPLOYMENT_TYPE[job.employmentType],
         workMode: WORK_MODE[job.workMode],
         experienceLevel: job.experienceLevel,
-        qualification: job.qualification,
-        salaryMin: job.salaryMin,
-        salaryMax: job.salaryMax,
-        salaryCurrency: job.currency,
-        country: job.country,
-        state: job.state === "—" ? null : job.state,
-        city: job.city,
-        responsibilities: job.responsibilities,
-        requirements: job.requirements,
+        salary: jobSalary(job),
+        location: jobLocation(job),
         applicationUrl: job.applicationUrl,
         featuredImageUrl: "/images/jobs-hub.png",
         publishedAt,
@@ -194,18 +242,16 @@ async function main() {
     }
     await prisma.scholarship.upsert({
       where: { slug: s.slug },
-      update: { description: s.description },
+      update: {},
       create: {
         slug: s.slug,
         title: s.title,
-        description: s.description,
+        content: EMPTY_TIPTAP_DOC,
+        contentHtml: scholarshipContentHtml(s),
         country: s.country,
         university: s.university,
         amount: s.amount,
         fundingType: s.fundingType,
-        eligibility: s.eligibility,
-        requirements: s.requirements,
-        documents: s.documents,
         howToApply: s.howToApply,
         officialUrl: s.officialUrl,
         categoryId: catId,
@@ -230,18 +276,17 @@ async function main() {
     }
     await prisma.grant.upsert({
       where: { slug: g.slug },
-      update: { description: g.description },
+      update: {},
       create: {
         slug: g.slug,
         title: g.title,
-        description: g.description,
+        content: EMPTY_TIPTAP_DOC,
+        contentHtml: grantContentHtml(g),
         provider: g.provider,
         fundingAmount: g.fundingAmount,
-        eligibility: g.eligibility,
+        industry: g.industry,
         country: g.country,
         businessStage: g.businessStage,
-        industry: g.industry,
-        requirements: g.requirements,
         applicationUrl: g.applicationUrl,
         categoryId: catId,
         featuredImageUrl: "/images/grants-hub.png",
@@ -271,9 +316,7 @@ async function main() {
         slug: post.slug,
         title: post.title,
         excerpt: post.excerpt,
-        // Placeholder Tiptap doc — the rich text editor (admin dashboard)
-        // will populate real editable JSON the first time this post is opened.
-        content: { type: "doc", content: [] },
+        content: EMPTY_TIPTAP_DOC,
         contentHtml: post.contentHtml,
         authorId: authId,
         categoryId: catId,

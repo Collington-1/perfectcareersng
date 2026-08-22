@@ -1,29 +1,29 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { scholarshipCategories } from "@/lib/mock-data";
 import type { AdminFormState } from "@/lib/actions/admin-scholarships";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TiptapEditor } from "@/components/admin/tiptap-editor";
 
 export type ScholarshipFormDefaults = {
   title: string;
   slug: string;
   categorySlug: string;
+  customCategory: string;
   country: string;
   university: string;
   amount: string;
   fundingType: string;
-  description: string;
-  eligibility: string[];
-  requirements: string[];
-  documents: string[];
   howToApply: string;
   officialUrl: string;
   deadline: string;
   isFeatured: boolean;
+  contentJson?: unknown;
+  contentHtml?: string;
 };
 
 const selectClass =
@@ -39,6 +39,7 @@ export function ScholarshipForm({
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, { status: "idle" });
+  const [category, setCategory] = useState(defaults?.categorySlug ?? "");
 
   return (
     <form action={formAction} className="mt-6 flex flex-col gap-6">
@@ -57,7 +58,14 @@ export function ScholarshipForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="categorySlug">Destination Category</Label>
-          <select id="categorySlug" name="categorySlug" required defaultValue={defaults?.categorySlug} className={selectClass}>
+          <select
+            id="categorySlug"
+            name="categorySlug"
+            required
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={selectClass}
+          >
             <option value="">Select a category</option>
             {scholarshipCategories.map((c) => (
               <option key={c.slug} value={c.slug}>
@@ -66,6 +74,12 @@ export function ScholarshipForm({
             ))}
           </select>
         </div>
+        {category === "other" && (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="customCategory">Custom Destination Name</Label>
+            <Input id="customCategory" name="customCategory" required placeholder="e.g. South America" defaultValue={defaults?.customCategory} />
+          </div>
+        )}
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="university">University</Label>
@@ -99,21 +113,13 @@ export function ScholarshipForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" rows={4} required defaultValue={defaults?.description} />
+        <Label>Description, Requirements, Eligibility & Documents Needed</Label>
+        <p className="text-xs text-muted-foreground">
+          Use Heading 2/3 to create section titles (e.g. &ldquo;Eligibility&rdquo;) and Bold within the text.
+        </p>
+        <TiptapEditor initialJson={defaults?.contentJson} initialHtml={defaults?.contentHtml} />
       </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="eligibility">Eligibility (one per line)</Label>
-        <Textarea id="eligibility" name="eligibility" rows={4} defaultValue={defaults?.eligibility?.join("\n")} />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="requirements">Requirements (one per line)</Label>
-        <Textarea id="requirements" name="requirements" rows={3} defaultValue={defaults?.requirements?.join("\n")} />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="documents">Documents Needed (one per line)</Label>
-        <Textarea id="documents" name="documents" rows={3} defaultValue={defaults?.documents?.join("\n")} />
-      </div>
+
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="howToApply">How to Apply</Label>
         <Textarea id="howToApply" name="howToApply" rows={3} defaultValue={defaults?.howToApply} />

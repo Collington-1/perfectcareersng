@@ -1,21 +1,15 @@
-// Live database reads, shaped to match mock-data.ts's Mock* types exactly.
-// Pages import from here instead of mock-data.ts; nothing downstream
-// (cards, detail pages) needs to change since the shape is identical.
+// Live database reads. Job/Scholarship/Grant now carry a single rich-text
+// content field (see prisma/schema.prisma) instead of separate structured
+// fields, so their view types live here rather than reusing mock-data.ts's
+// Mock* shapes (still used for Blog/Testimonials, which didn't change).
 import { prisma } from "./prisma";
-import type {
-  MockJob,
-  MockScholarship,
-  MockGrant,
-  MockBlogPost,
-  MockAuthor,
-  MockTestimonial,
-} from "./mock-data";
+import type { MockBlogPost, MockAuthor, MockTestimonial } from "./mock-data";
 
 function dateStr(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
-const EMPLOYMENT_TYPE_LABEL: Record<string, MockJob["employmentType"]> = {
+const EMPLOYMENT_TYPE_LABEL: Record<string, JobView["employmentType"]> = {
   FULL_TIME: "Full-time",
   PART_TIME: "Part-time",
   CONTRACT: "Contract",
@@ -23,14 +17,31 @@ const EMPLOYMENT_TYPE_LABEL: Record<string, MockJob["employmentType"]> = {
   FREELANCE: "Contract",
 };
 
-const WORK_MODE_LABEL: Record<string, MockJob["workMode"]> = {
+const WORK_MODE_LABEL: Record<string, JobView["workMode"]> = {
   ONSITE: "Onsite",
   REMOTE: "Remote",
   HYBRID: "Hybrid",
 };
 
 // ---------------------------------------------------------------- Jobs ----
-export async function getAllJobs(): Promise<MockJob[]> {
+export type JobView = {
+  slug: string;
+  title: string;
+  company: string;
+  companyLogo?: string;
+  category: string;
+  employmentType: "Full-time" | "Part-time" | "Contract" | "Internship";
+  workMode: "Onsite" | "Remote" | "Hybrid";
+  location: string;
+  salary: string | null;
+  experienceLevel: string;
+  deadline: string;
+  applicationUrl: string;
+  publishedAt: string;
+  contentHtml: string;
+};
+
+export async function getAllJobs(): Promise<JobView[]> {
   const jobs = await prisma.job.findMany({
     include: { company: true, category: true },
     orderBy: { publishedAt: "desc" },
@@ -40,63 +51,84 @@ export async function getAllJobs(): Promise<MockJob[]> {
     title: job.title,
     company: job.company.name,
     companyLogo: job.company.logoUrl ?? undefined,
-    category: job.category.name,
+    category: job.customCategory || job.category.name,
     employmentType: EMPLOYMENT_TYPE_LABEL[job.employmentType] ?? "Full-time",
     workMode: WORK_MODE_LABEL[job.workMode] ?? "Onsite",
-    city: job.city ?? "Remote",
-    state: job.state ?? "—",
-    country: job.country,
-    salaryMin: job.salaryMin ?? undefined,
-    salaryMax: job.salaryMax ?? undefined,
-    currency: job.salaryCurrency,
+    location: job.location,
+    salary: job.salary,
     experienceLevel: job.experienceLevel ?? "",
-    qualification: job.qualification ?? "",
     deadline: job.deadline ? dateStr(job.deadline) : "",
     applicationUrl: job.applicationUrl,
     publishedAt: dateStr(job.publishedAt),
-    description: job.description,
-    responsibilities: (job.responsibilities as string[] | null) ?? [],
-    requirements: (job.requirements as string[] | null) ?? [],
+    contentHtml: job.contentHtml,
   }));
 }
 
 // ------------------------------------------------------- Scholarships -----
-export async function getAllScholarships(): Promise<MockScholarship[]> {
-  const rows = await prisma.scholarship.findMany({ orderBy: { publishedAt: "desc" } });
+export type ScholarshipView = {
+  slug: string;
+  title: string;
+  university: string;
+  country: string;
+  category: string;
+  amount: string;
+  fundingType: string;
+  deadline: string;
+  publishedAt: string;
+  contentHtml: string;
+  howToApply: string;
+  officialUrl: string;
+};
+
+export async function getAllScholarships(): Promise<ScholarshipView[]> {
+  const rows = await prisma.scholarship.findMany({
+    include: { category: true },
+    orderBy: { publishedAt: "desc" },
+  });
   return rows.map((s) => ({
     slug: s.slug,
     title: s.title,
     university: s.university,
     country: s.country,
+    category: s.customCategory || s.category.name,
     amount: s.amount ?? "",
     fundingType: s.fundingType ?? "",
     deadline: s.deadline ? dateStr(s.deadline) : "",
     publishedAt: dateStr(s.publishedAt),
-    description: s.description ?? "",
-    eligibility: (s.eligibility as string[] | null) ?? [],
-    requirements: (s.requirements as string[] | null) ?? [],
-    documents: (s.documents as string[] | null) ?? [],
+    contentHtml: s.contentHtml,
     howToApply: s.howToApply ?? "",
     officialUrl: s.officialUrl,
   }));
 }
 
 // -------------------------------------------------------------- Grants ----
-export async function getAllGrants(): Promise<MockGrant[]> {
+export type GrantView = {
+  slug: string;
+  title: string;
+  provider: string;
+  fundingAmount: string;
+  industry: string;
+  country: string;
+  businessStage: string;
+  deadline: string;
+  publishedAt: string;
+  contentHtml: string;
+  applicationUrl: string;
+};
+
+export async function getAllGrants(): Promise<GrantView[]> {
   const rows = await prisma.grant.findMany({ orderBy: { publishedAt: "desc" } });
   return rows.map((g) => ({
     slug: g.slug,
     title: g.title,
     provider: g.provider,
     fundingAmount: g.fundingAmount ?? "",
-    industry: g.industry ?? "",
+    industry: g.customCategory || g.industry || "",
     country: g.country,
     businessStage: g.businessStage ?? "",
     deadline: g.deadline ? dateStr(g.deadline) : "",
     publishedAt: dateStr(g.publishedAt),
-    description: g.description ?? "",
-    eligibility: (g.eligibility as string[] | null) ?? [],
-    requirements: (g.requirements as string[] | null) ?? [],
+    contentHtml: g.contentHtml,
     applicationUrl: g.applicationUrl,
   }));
 }

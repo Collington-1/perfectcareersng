@@ -87,31 +87,36 @@ model Author {
 }
 
 model Job {
-  id          String @id @default(cuid())
+  id   String @id @default(cuid())
   title       String
   slug        String @unique
-  description String
 
-  companyId  String
-  company    Company  @relation(fields: [companyId], references: [id])
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+  // Tiptap document JSON (source of truth, editable) + rendered HTML cache,
+  // covering Description/Qualifications/Responsibilities/Requirements in one
+  // rich-text field the admin structures with headings.
+  content     Json
+  contentHtml String
+
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id])
+  // Free-text label shown instead of the category name when categoryId
+  // points at the "Other" bucket for that type.
+  customCategory String?
 
   employmentType  EmploymentType
   workMode        WorkMode
   experienceLevel String?
-  qualification   String?
 
-  salaryMin      Int?
-  salaryMax      Int?
-  salaryCurrency String @default("NGN")
+  // Single free-text box (e.g. "₦500,000 - ₦800,000/month" or "Negotiable")
+  // instead of separate min/max fields.
+  salary String?
 
-  country String
-  state   String?
-  city    String?
+  // Single free-text location (e.g. "Lagos, Nigeria" or "Remote") instead of
+  // separate country/state/city fields.
+  location String
 
-  responsibilities Json? // string[]
-  requirements     Json? // string[]
   applicationUrl   String
   featuredImageUrl String?
 
@@ -133,10 +138,14 @@ model Job {
 }
 
 model Scholarship {
-  id          String  @id @default(cuid())
-  title       String
-  slug        String  @unique
-  description String?
+  id    String @id @default(cuid())
+  title String
+  slug  String @unique
+
+  // Tiptap document JSON + rendered HTML cache, covering Description/
+  // Requirements/Eligibility/Documents Needed in one rich-text field.
+  content     Json
+  contentHtml String
 
   country    String
   university String
@@ -144,14 +153,14 @@ model Scholarship {
   amount      String?
   fundingType String?
 
-  eligibility  Json // string[]
-  requirements Json? // string[]
-  documents    Json? // string[]
-  howToApply   String?
-  officialUrl  String
+  howToApply  String?
+  officialUrl String
 
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId     String
+  category       Category @relation(fields: [categoryId], references: [id])
+  // Free-text label shown instead of the category name when categoryId
+  // points at the "Other" destination bucket.
+  customCategory String?
 
   featuredImageUrl String?
   seoTitle         String?
@@ -172,23 +181,28 @@ model Scholarship {
 }
 
 model Grant {
-  id          String  @id @default(cuid())
-  title       String
-  slug        String  @unique
-  provider    String
-  description String?
+  id       String @id @default(cuid())
+  title    String
+  slug     String @unique
+  provider String
+
+  // Tiptap document JSON + rendered HTML cache, covering Description/
+  // Eligibility/Requirements in one rich-text field.
+  content     Json
+  contentHtml String
 
   fundingAmount String?
-  eligibility   Json // string[]
   country       String
   businessStage String?
   industry      String?
 
-  requirements   Json? // string[]
   applicationUrl String
 
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId     String
+  category       Category @relation(fields: [categoryId], references: [id])
+  // Free-text label shown instead of the category name when categoryId
+  // points at the "Other" industry bucket.
+  customCategory String?
 
   featuredImageUrl String?
   seoTitle         String?

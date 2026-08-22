@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Briefcase, MapPin, CalendarClock, GraduationCap, BadgeCheck, CheckCircle2 } from "lucide-react";
+import { Briefcase, MapPin, CalendarClock, BadgeCheck } from "lucide-react";
 import { Container, Section } from "@/components/layout/container";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { AdSlot } from "@/components/layout/ad-slot";
 import { ShareButtons } from "@/components/content/share-buttons";
+import { ApplyButton } from "@/components/content/apply-button";
 import { JobCard } from "@/components/content/job-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatSalary, formatDeadline, formatRelativeDate } from "@/lib/format";
-import { whatsappLink } from "@/lib/site-config";
+import { formatDeadline, formatRelativeDate, stripHtmlToExcerpt } from "@/lib/format";
 import { getAllJobs } from "@/lib/data";
 
 export async function generateStaticParams() {
@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const job = jobs.find((j) => j.slug === slug);
   if (!job) return {};
   return {
-    title: `${job.title} at ${job.company} — ${job.city} | PerfectCareers`,
-    description: job.description,
+    title: `${job.title} at ${job.company} — ${job.location} | PerfectCareers`,
+    description: stripHtmlToExcerpt(job.contentHtml),
     alternates: { canonical: `/jobs/${job.slug}` },
   };
 }
@@ -42,27 +42,17 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
     "@context": "https://schema.org",
     "@type": "JobPosting",
     title: job.title,
-    description: job.description,
+    description: stripHtmlToExcerpt(job.contentHtml, 500),
     datePosted: job.publishedAt,
     validThrough: job.deadline,
     employmentType: job.employmentType.toUpperCase().replace("-", "_"),
     hiringOrganization: { "@type": "Organization", name: job.company },
+    jobLocationType: job.workMode === "Remote" ? "TELECOMMUTE" : undefined,
+    applicantLocationRequirements: job.workMode === "Remote" ? { "@type": "Country", name: "Nigeria" } : undefined,
     jobLocation:
       job.workMode === "Remote"
         ? undefined
-        : {
-            "@type": "Place",
-            address: { "@type": "PostalAddress", addressLocality: job.city, addressRegion: job.state, addressCountry: "NG" },
-          },
-    applicantLocationRequirements: job.workMode === "Remote" ? { "@type": "Country", name: "Nigeria" } : undefined,
-    jobLocationType: job.workMode === "Remote" ? "TELECOMMUTE" : undefined,
-    baseSalary: job.salaryMin
-      ? {
-          "@type": "MonetaryAmount",
-          currency: job.currency,
-          value: { "@type": "QuantitativeValue", minValue: job.salaryMin, maxValue: job.salaryMax, unitText: "MONTH" },
-        }
-      : undefined,
+        : { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: job.location, addressCountry: "NG" } },
   };
 
   return (
@@ -88,52 +78,30 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                 <Badge variant="outline">{job.employmentType}</Badge>
                 <Badge variant="outline">{job.workMode}</Badge>
                 <Badge variant="outline">{job.category}</Badge>
-                <Badge variant="outline">{job.experienceLevel}</Badge>
+                {job.experienceLevel && <Badge variant="outline">{job.experienceLevel}</Badge>}
               </div>
 
               <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-y border-border py-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <MapPin className="size-4" />
-                  {job.workMode === "Remote" ? "Remote" : `${job.city}, ${job.state}`}
+                  {job.location}
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <BadgeCheck className="size-4" />
-                  {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
-                </span>
+                {job.salary && (
+                  <span className="flex items-center gap-1.5">
+                    <BadgeCheck className="size-4" />
+                    {job.salary}
+                  </span>
+                )}
                 <span className="flex items-center gap-1.5">
                   <CalendarClock className="size-4" />
                   Apply by {formatDeadline(job.deadline)}
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <GraduationCap className="size-4" />
-                  {job.qualification}
-                </span>
               </div>
 
-              <div className="prose prose-neutral mt-8 max-w-none">
-                <h2 className="font-heading text-xl font-semibold text-foreground">About the role</h2>
-                <p className="text-muted-foreground">{job.description}</p>
-
-                <h2 className="mt-8 font-heading text-xl font-semibold text-foreground">Responsibilities</h2>
-                <ul className="mt-3 space-y-2">
-                  {job.responsibilities.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-muted-foreground">
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <h2 className="mt-8 font-heading text-xl font-semibold text-foreground">Requirements</h2>
-                <ul className="mt-3 space-y-2">
-                  {job.requirements.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-muted-foreground">
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-secondary" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <div
+                className="prose prose-neutral mt-8 max-w-none prose-headings:font-heading prose-headings:text-foreground"
+                dangerouslySetInnerHTML={{ __html: job.contentHtml }}
+              />
 
               <AdSlot type="in-article" className="mt-10" />
 
@@ -146,13 +114,14 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
               <div className="rounded-2xl bg-white p-6 shadow-lg shadow-black/5 ring-1 ring-border">
                 <p className="font-heading text-lg font-bold text-foreground">Ready to apply?</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Applications for this role close {formatDeadline(job.deadline)}. Reach out via WhatsApp and we'll guide you through it.
+                  Applications for this role close {formatDeadline(job.deadline)}.
                 </p>
-                <Button asChild size="lg" className="mt-4 w-full">
-                  <a href={whatsappLink(`Hi, I'd like to apply for the ${job.title} role at ${job.company}.`)} target="_blank" rel="noopener noreferrer">
-                    Apply via WhatsApp
-                  </a>
-                </Button>
+                <div className="mt-4">
+                  <ApplyButton
+                    applicationUrl={job.applicationUrl}
+                    whatsappMessage={`Hi, I'd like to apply for the ${job.title} role at ${job.company}.`}
+                  />
+                </div>
                 <Button asChild variant="outline" size="lg" className="mt-2 w-full">
                   <Link href="/services/cv-writing">Get your CV reviewed first</Link>
                 </Button>

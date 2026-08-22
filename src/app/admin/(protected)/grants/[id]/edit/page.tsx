@@ -21,17 +21,16 @@ export default async function EditGrantPage({ params }: { params: Promise<{ id: 
           title: grant.title,
           slug: grant.slug,
           categorySlug: grant.category.slug,
+          customCategory: grant.customCategory ?? "",
           provider: grant.provider,
           fundingAmount: grant.fundingAmount ?? "",
-          industry: grant.industry ?? "",
           country: grant.country,
           businessStage: grant.businessStage ?? "",
-          description: grant.description ?? "",
-          eligibility: (grant.eligibility as string[] | null) ?? [],
-          requirements: (grant.requirements as string[] | null) ?? [],
           applicationUrl: grant.applicationUrl,
           deadline: grant.deadline ? grant.deadline.toISOString().slice(0, 10) : "",
           isFeatured: grant.isFeatured,
+          contentJson: grant.content,
+          contentHtml: grant.contentHtml,
         }}
       />
     </div>

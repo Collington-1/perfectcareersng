@@ -1,28 +1,27 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { grantCategories } from "@/lib/mock-data";
 import type { AdminFormState } from "@/lib/actions/admin-grants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TiptapEditor } from "@/components/admin/tiptap-editor";
 
 export type GrantFormDefaults = {
   title: string;
   slug: string;
   categorySlug: string;
+  customCategory: string;
   provider: string;
   fundingAmount: string;
-  industry: string;
   country: string;
   businessStage: string;
-  description: string;
-  eligibility: string[];
-  requirements: string[];
   applicationUrl: string;
   deadline: string;
   isFeatured: boolean;
+  contentJson?: unknown;
+  contentHtml?: string;
 };
 
 const selectClass =
@@ -38,6 +37,7 @@ export function GrantForm({
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, { status: "idle" });
+  const [category, setCategory] = useState(defaults?.categorySlug ?? "");
 
   return (
     <form action={formAction} className="mt-6 flex flex-col gap-6">
@@ -56,7 +56,14 @@ export function GrantForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="categorySlug">Industry Category</Label>
-          <select id="categorySlug" name="categorySlug" required defaultValue={defaults?.categorySlug} className={selectClass}>
+          <select
+            id="categorySlug"
+            name="categorySlug"
+            required
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={selectClass}
+          >
             <option value="">Select a category</option>
             {grantCategories.map((c) => (
               <option key={c.slug} value={c.slug}>
@@ -65,6 +72,12 @@ export function GrantForm({
             ))}
           </select>
         </div>
+        {category === "other" && (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="customCategory">Custom Industry Name</Label>
+            <Input id="customCategory" name="customCategory" required placeholder="e.g. Logistics" defaultValue={defaults?.customCategory} />
+          </div>
+        )}
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="provider">Provider</Label>
@@ -76,39 +89,31 @@ export function GrantForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="industry">Industry Label</Label>
-          <Input id="industry" name="industry" placeholder="e.g. Women-led Business" defaultValue={defaults?.industry} />
-        </div>
-        <div className="flex flex-col gap-1.5">
           <Label htmlFor="country">Country</Label>
           <Input id="country" name="country" required defaultValue={defaults?.country ?? "Nigeria"} />
         </div>
-
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="businessStage">Business Stage</Label>
           <Input id="businessStage" name="businessStage" placeholder="e.g. Early-stage" defaultValue={defaults?.businessStage} />
         </div>
-        <div className="flex flex-col gap-1.5">
+
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
           <Label htmlFor="deadline">Deadline</Label>
           <Input id="deadline" name="deadline" type="date" defaultValue={defaults?.deadline} />
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" rows={4} required defaultValue={defaults?.description} />
+        <Label>Description, Eligibility & Requirements</Label>
+        <p className="text-xs text-muted-foreground">
+          Use Heading 2/3 to create section titles (e.g. &ldquo;Eligibility&rdquo;) and Bold within the text.
+        </p>
+        <TiptapEditor initialJson={defaults?.contentJson} initialHtml={defaults?.contentHtml} />
       </div>
+
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="eligibility">Eligibility (one per line)</Label>
-        <Textarea id="eligibility" name="eligibility" rows={4} defaultValue={defaults?.eligibility?.join("\n")} />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="requirements">Requirements (one per line)</Label>
-        <Textarea id="requirements" name="requirements" rows={3} defaultValue={defaults?.requirements?.join("\n")} />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="applicationUrl">Application Link</Label>
-        <Input id="applicationUrl" name="applicationUrl" required defaultValue={defaults?.applicationUrl ?? "#"} />
+        <Label htmlFor="applicationUrl">Application Link or Email</Label>
+        <Input id="applicationUrl" name="applicationUrl" required placeholder="https://... or apply@org.com" defaultValue={defaults?.applicationUrl ?? "#"} />
       </div>
 
       <label className="flex items-center gap-2 text-sm text-foreground">

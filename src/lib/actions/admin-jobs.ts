@@ -9,32 +9,22 @@ function slugify(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-function linesToArray(value: FormDataEntryValue | null) {
-  return String(value ?? "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-}
-
 const jobSchema = z.object({
   title: z.string().min(3, "Title is required."),
   slug: z.string().min(3, "Slug is required."),
   company: z.string().min(2, "Company name is required."),
   categorySlug: z.string().min(1, "Choose a category."),
+  customCategory: z.string().optional(),
   employmentType: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP"]),
   workMode: z.enum(["ONSITE", "REMOTE", "HYBRID"]),
   experienceLevel: z.string().optional(),
-  qualification: z.string().optional(),
-  salaryMin: z.coerce.number().optional(),
-  salaryMax: z.coerce.number().optional(),
-  salaryCurrency: z.string().default("NGN"),
-  country: z.string().min(2, "Country is required."),
-  state: z.string().optional(),
-  city: z.string().optional(),
-  description: z.string().min(20, "Description should be a bit longer."),
-  applicationUrl: z.string().min(1, "Application link is required."),
+  salary: z.string().optional(),
+  location: z.string().min(2, "Location is required."),
+  applicationUrl: z.string().min(1, "Application link or email is required."),
   deadline: z.string().optional(),
   isFeatured: z.coerce.boolean().default(false),
+  content: z.string().min(1, "Job content can't be empty."),
+  contentHtml: z.string().min(1, "Job content can't be empty."),
 });
 
 export type AdminFormState = { status: "idle" | "error"; message?: string };
@@ -45,20 +35,17 @@ async function parseJobForm(formData: FormData) {
     slug: formData.get("slug") || slugify(String(formData.get("title") ?? "")),
     company: formData.get("company"),
     categorySlug: formData.get("categorySlug"),
+    customCategory: formData.get("categorySlug") === "other" ? formData.get("customCategory") || undefined : undefined,
     employmentType: formData.get("employmentType"),
     workMode: formData.get("workMode"),
     experienceLevel: formData.get("experienceLevel") || undefined,
-    qualification: formData.get("qualification") || undefined,
-    salaryMin: formData.get("salaryMin") || undefined,
-    salaryMax: formData.get("salaryMax") || undefined,
-    salaryCurrency: formData.get("salaryCurrency") || "NGN",
-    country: formData.get("country"),
-    state: formData.get("state") || undefined,
-    city: formData.get("city") || undefined,
-    description: formData.get("description"),
+    salary: formData.get("salary") || undefined,
+    location: formData.get("location"),
     applicationUrl: formData.get("applicationUrl"),
     deadline: formData.get("deadline") || undefined,
     isFeatured: formData.get("isFeatured") === "on",
+    content: formData.get("content"),
+    contentHtml: formData.get("contentHtml"),
   };
   const parsed = jobSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Please check the form." } as const;
@@ -73,13 +60,7 @@ async function parseJobForm(formData: FormData) {
     create: { slug: companySlug, name: parsed.data.company },
   });
 
-  return {
-    data: parsed.data,
-    categoryId: category.id,
-    companyId: company.id,
-    responsibilities: linesToArray(formData.get("responsibilities")),
-    requirements: linesToArray(formData.get("requirements")),
-  } as const;
+  return { data: parsed.data, categoryId: category.id, companyId: company.id } as const;
 }
 
 export async function createJob(_prevState: AdminFormState, formData: FormData): Promise<AdminFormState> {
@@ -94,21 +75,16 @@ export async function createJob(_prevState: AdminFormState, formData: FormData):
       data: {
         title: result.data.title,
         slug: result.data.slug,
-        description: result.data.description,
+        content: JSON.parse(result.data.content),
+        contentHtml: result.data.contentHtml,
         companyId: result.companyId,
         categoryId: result.categoryId,
+        customCategory: result.data.customCategory,
         employmentType: result.data.employmentType,
         workMode: result.data.workMode,
         experienceLevel: result.data.experienceLevel,
-        qualification: result.data.qualification,
-        salaryMin: result.data.salaryMin,
-        salaryMax: result.data.salaryMax,
-        salaryCurrency: result.data.salaryCurrency,
-        country: result.data.country,
-        state: result.data.state,
-        city: result.data.city,
-        responsibilities: result.responsibilities,
-        requirements: result.requirements,
+        salary: result.data.salary,
+        location: result.data.location,
         applicationUrl: result.data.applicationUrl,
         featuredImageUrl: "/images/jobs-hub.png",
         deadline: result.data.deadline ? new Date(result.data.deadline) : undefined,
@@ -123,6 +99,7 @@ export async function createJob(_prevState: AdminFormState, formData: FormData):
 
   revalidatePath("/admin/jobs");
   revalidatePath("/jobs");
+  revalidatePath("/");
   redirect("/admin/jobs");
 }
 
@@ -136,21 +113,16 @@ export async function updateJob(id: string, _prevState: AdminFormState, formData
       data: {
         title: result.data.title,
         slug: result.data.slug,
-        description: result.data.description,
+        content: JSON.parse(result.data.content),
+        contentHtml: result.data.contentHtml,
         companyId: result.companyId,
         categoryId: result.categoryId,
+        customCategory: result.data.customCategory,
         employmentType: result.data.employmentType,
         workMode: result.data.workMode,
         experienceLevel: result.data.experienceLevel,
-        qualification: result.data.qualification,
-        salaryMin: result.data.salaryMin,
-        salaryMax: result.data.salaryMax,
-        salaryCurrency: result.data.salaryCurrency,
-        country: result.data.country,
-        state: result.data.state,
-        city: result.data.city,
-        responsibilities: result.responsibilities,
-        requirements: result.requirements,
+        salary: result.data.salary,
+        location: result.data.location,
         applicationUrl: result.data.applicationUrl,
         deadline: result.data.deadline ? new Date(result.data.deadline) : undefined,
         isFeatured: result.data.isFeatured,
@@ -162,6 +134,7 @@ export async function updateJob(id: string, _prevState: AdminFormState, formData
 
   revalidatePath("/admin/jobs");
   revalidatePath("/jobs");
+  revalidatePath("/");
   redirect("/admin/jobs");
 }
 
@@ -169,4 +142,5 @@ export async function deleteJob(id: string) {
   await prisma.job.delete({ where: { id } });
   revalidatePath("/admin/jobs");
   revalidatePath("/jobs");
+  revalidatePath("/");
 }

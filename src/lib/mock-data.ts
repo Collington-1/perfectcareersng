@@ -98,6 +98,19 @@ export const jobCategories = [
   { slug: "education", label: "Education" },
   { slug: "logistics", label: "Logistics & Supply Chain" },
   { slug: "sales", label: "Sales & Business Development" },
+  { slug: "agriculture", label: "Agriculture" },
+  { slug: "management", label: "Management" },
+  { slug: "engineering", label: "Engineering" },
+  { slug: "construction-real-estate", label: "Construction & Real Estate" },
+  { slug: "legal", label: "Legal" },
+  { slug: "hospitality-tourism", label: "Hospitality & Tourism" },
+  { slug: "media-creative", label: "Media & Creative" },
+  { slug: "manufacturing", label: "Manufacturing" },
+  { slug: "telecommunications", label: "Telecommunications" },
+  { slug: "ngo-development", label: "NGO & Development" },
+  { slug: "government-public-sector", label: "Government & Public Sector" },
+  { slug: "admin-office", label: "Admin & Office Support" },
+  { slug: "other", label: "Other" },
 ];
 
 export const scholarshipCategories = [
@@ -107,6 +120,7 @@ export const scholarshipCategories = [
   { slug: "europe", label: "Europe" },
   { slug: "asia-pacific", label: "Asia Pacific" },
   { slug: "nigeria", label: "Nigeria (Local)" },
+  { slug: "other", label: "Other" },
 ];
 
 export const grantCategories = [
@@ -118,6 +132,7 @@ export const grantCategories = [
   { slug: "health-tech", label: "Health & Medtech" },
   { slug: "trade-export", label: "Trade & Export" },
   { slug: "renewable-energy", label: "Renewable Energy" },
+  { slug: "other", label: "Other" },
 ];
 
 export const blogCategories = [

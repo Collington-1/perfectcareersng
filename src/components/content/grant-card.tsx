@@ -3,9 +3,9 @@ import { HandCoins, CalendarClock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDeadline } from "@/lib/format";
-import type { MockGrant } from "@/lib/mock-data";
+import type { GrantView } from "@/lib/data";
 
-export function GrantCard({ grant }: { grant: MockGrant }) {
+export function GrantCard({ grant }: { grant: GrantView }) {
   return (
     <Card className="p-0 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5">
       <Link href={`/grants/${grant.slug}`} className="group flex h-full flex-col gap-3 p-5">

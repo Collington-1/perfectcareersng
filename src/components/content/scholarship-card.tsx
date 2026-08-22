@@ -2,9 +2,9 @@ import Link from "next/link";
 import { GraduationCap, CalendarClock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formatDeadline } from "@/lib/format";
-import type { MockScholarship } from "@/lib/mock-data";
+import type { ScholarshipView } from "@/lib/data";
 
-export function ScholarshipCard({ scholarship }: { scholarship: MockScholarship }) {
+export function ScholarshipCard({ scholarship }: { scholarship: ScholarshipView }) {
   return (
     <Card className="p-0 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-secondary/5">
       <Link href={`/scholarships/${scholarship.slug}`} className="group flex h-full flex-col gap-3 p-5">

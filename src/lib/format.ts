@@ -1,10 +1,14 @@
-export function formatSalary(min?: number, max?: number, currency = "NGN") {
-  if (!min && !max) return "Salary undisclosed";
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("en-NG", { notation: "compact", maximumFractionDigits: 1 }).format(n);
-  const symbol = currency === "NGN" ? "₦" : currency + " ";
-  if (min && max) return `${symbol}${fmt(min)} - ${symbol}${fmt(max)}`;
-  return `${symbol}${fmt((min ?? max)!)}`;
+// Meta descriptions need plain text — Job/Scholarship/Grant content is now
+// a single rich-text HTML blob rather than a separate plain-text field.
+export function stripHtmlToExcerpt(html: string, maxLength = 155) {
+  const text = html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 1).trimEnd() + "…";
 }
 
 export function formatRelativeDate(dateString: string) {

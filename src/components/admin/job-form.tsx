@@ -1,34 +1,29 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { jobCategories } from "@/lib/mock-data";
 import type { AdminFormState } from "@/lib/actions/admin-jobs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { TiptapEditor } from "@/components/admin/tiptap-editor";
 
 export type JobFormDefaults = {
   title: string;
   slug: string;
   company: string;
   categorySlug: string;
+  customCategory: string;
   employmentType: string;
   workMode: string;
   experienceLevel: string;
-  qualification: string;
-  salaryMin: number | null;
-  salaryMax: number | null;
-  salaryCurrency: string;
-  country: string;
-  state: string;
-  city: string;
-  description: string;
-  responsibilities: string[];
-  requirements: string[];
+  salary: string;
+  location: string;
   applicationUrl: string;
   deadline: string;
   isFeatured: boolean;
+  contentJson?: unknown;
+  contentHtml?: string;
 };
 
 const selectClass =
@@ -44,6 +39,7 @@ export function JobForm({
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, { status: "idle" });
+  const [category, setCategory] = useState(defaults?.categorySlug ?? "");
 
   return (
     <form action={formAction} className="mt-6 flex flex-col gap-6">
@@ -67,7 +63,14 @@ export function JobForm({
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="categorySlug">Category</Label>
-          <select id="categorySlug" name="categorySlug" required defaultValue={defaults?.categorySlug} className={selectClass}>
+          <select
+            id="categorySlug"
+            name="categorySlug"
+            required
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={selectClass}
+          >
             <option value="">Select a category</option>
             {jobCategories.map((c) => (
               <option key={c.slug} value={c.slug}>
@@ -76,6 +79,13 @@ export function JobForm({
             ))}
           </select>
         </div>
+        {category === "other" && (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="customCategory">Custom Category Name</Label>
+            <Input id="customCategory" name="customCategory" required placeholder="e.g. Aviation" defaultValue={defaults?.customCategory} />
+          </div>
+        )}
+
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="employmentType">Employment Type</Label>
           <select id="employmentType" name="employmentType" required defaultValue={defaults?.employmentType ?? "FULL_TIME"} className={selectClass}>
@@ -99,36 +109,14 @@ export function JobForm({
           <Input id="experienceLevel" name="experienceLevel" placeholder="e.g. Mid-level (3-5 years)" defaultValue={defaults?.experienceLevel} />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="qualification">Qualification</Label>
-          <Input id="qualification" name="qualification" placeholder="e.g. B.Sc in a relevant field" defaultValue={defaults?.qualification} />
+          <Label htmlFor="location">Location</Label>
+          <Input id="location" name="location" required placeholder="e.g. Lagos, Nigeria or Remote" defaultValue={defaults?.location} />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="salaryMin">Salary Min (optional)</Label>
-          <Input id="salaryMin" name="salaryMin" type="number" defaultValue={defaults?.salaryMin ?? undefined} />
+          <Label htmlFor="salary">Salary</Label>
+          <Input id="salary" name="salary" placeholder="e.g. ₦500,000 - ₦800,000/month or Negotiable" defaultValue={defaults?.salary} />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="salaryMax">Salary Max (optional)</Label>
-          <Input id="salaryMax" name="salaryMax" type="number" defaultValue={defaults?.salaryMax ?? undefined} />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="salaryCurrency">Currency</Label>
-          <Input id="salaryCurrency" name="salaryCurrency" defaultValue={defaults?.salaryCurrency ?? "NGN"} />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="country">Country</Label>
-          <Input id="country" name="country" required defaultValue={defaults?.country ?? "Nigeria"} />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="state">State</Label>
-          <Input id="state" name="state" defaultValue={defaults?.state} />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="city">City</Label>
-          <Input id="city" name="city" defaultValue={defaults?.city} />
-        </div>
-
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="deadline">Application Deadline</Label>
           <Input id="deadline" name="deadline" type="date" defaultValue={defaults?.deadline} />
@@ -136,27 +124,20 @@ export function JobForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" rows={4} required defaultValue={defaults?.description} />
+        <Label>Description, Qualifications, Requirements & Responsibilities</Label>
+        <p className="text-xs text-muted-foreground">
+          Use Heading 2/3 to create section titles (e.g. &ldquo;Requirements&rdquo;) and Bold within the text.
+        </p>
+        <TiptapEditor initialJson={defaults?.contentJson} initialHtml={defaults?.contentHtml} />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="responsibilities">Responsibilities (one per line)</Label>
-        <Textarea id="responsibilities" name="responsibilities" rows={4} defaultValue={defaults?.responsibilities?.join("\n")} />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="requirements">Requirements (one per line)</Label>
-        <Textarea id="requirements" name="requirements" rows={4} defaultValue={defaults?.requirements?.join("\n")} />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="applicationUrl">Application Link</Label>
+        <Label htmlFor="applicationUrl">Application Link or Email</Label>
         <Input
           id="applicationUrl"
           name="applicationUrl"
           required
-          placeholder="#apply-whatsapp or a real URL"
+          placeholder="https://... or apply@company.com — leave as #apply-whatsapp to use WhatsApp"
           defaultValue={defaults?.applicationUrl ?? "#apply-whatsapp"}
         />
       </div>

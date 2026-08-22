@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { GraduationCap, Globe2, CalendarClock, BadgeCheck, CheckCircle2, FileText } from "lucide-react";
+import { GraduationCap, Globe2, CalendarClock, BadgeCheck } from "lucide-react";
 import { Container, Section } from "@/components/layout/container";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { AdSlot } from "@/components/layout/ad-slot";
@@ -9,7 +9,7 @@ import { ShareButtons } from "@/components/content/share-buttons";
 import { ScholarshipCard } from "@/components/content/scholarship-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDeadline } from "@/lib/format";
+import { formatDeadline, stripHtmlToExcerpt } from "@/lib/format";
 import { whatsappLink } from "@/lib/site-config";
 import { getAllScholarships } from "@/lib/data";
 
@@ -23,7 +23,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const scholarships = await getAllScholarships();
   const s = scholarships.find((x) => x.slug === slug);
   if (!s) return {};
-  return { title: `${s.title} — ${s.country} | PerfectCareers`, description: s.description, alternates: { canonical: `/scholarships/${s.slug}` } };
+  return {
+    title: `${s.title} — ${s.country} | PerfectCareers`,
+    description: stripHtmlToExcerpt(s.contentHtml),
+    alternates: { canonical: `/scholarships/${s.slug}` },
+  };
 }
 
 export default async function ScholarshipDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -54,7 +58,7 @@ export default async function ScholarshipDetailPage({ params }: { params: Promis
 
               <div className="mt-5 flex flex-wrap gap-2">
                 <Badge variant="outline">{scholarship.fundingType}</Badge>
-                <Badge variant="outline">{scholarship.country}</Badge>
+                <Badge variant="outline">{scholarship.category}</Badge>
               </div>
 
               <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-y border-border py-4 text-sm text-muted-foreground">
@@ -72,43 +76,17 @@ export default async function ScholarshipDetailPage({ params }: { params: Promis
                 </span>
               </div>
 
-              <div className="prose prose-neutral mt-8 max-w-none">
-                <h2 className="font-heading text-xl font-semibold text-foreground">About this scholarship</h2>
-                <p className="text-muted-foreground">{scholarship.description}</p>
+              <div
+                className="prose prose-neutral mt-8 max-w-none prose-headings:font-heading prose-headings:text-foreground"
+                dangerouslySetInnerHTML={{ __html: scholarship.contentHtml }}
+              />
 
-                <h2 className="mt-8 font-heading text-xl font-semibold text-foreground">Eligibility</h2>
-                <ul className="mt-3 space-y-2">
-                  {scholarship.eligibility.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-muted-foreground">
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-secondary" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <h2 className="mt-8 font-heading text-xl font-semibold text-foreground">Requirements</h2>
-                <ul className="mt-3 space-y-2">
-                  {scholarship.requirements.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-muted-foreground">
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <h2 className="mt-8 font-heading text-xl font-semibold text-foreground">Documents Needed</h2>
-                <ul className="mt-3 space-y-2">
-                  {scholarship.documents.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-muted-foreground">
-                      <FileText className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <h2 className="mt-8 font-heading text-xl font-semibold text-foreground">How to Apply</h2>
-                <p className="text-muted-foreground">{scholarship.howToApply}</p>
-              </div>
+              {scholarship.howToApply && (
+                <div className="prose prose-neutral mt-6 max-w-none">
+                  <h2 className="font-heading text-xl font-semibold text-foreground">How to Apply</h2>
+                  <p className="text-muted-foreground">{scholarship.howToApply}</p>
+                </div>
+              )}
 
               <AdSlot type="in-article" className="mt-10" />
 
@@ -141,7 +119,7 @@ export default async function ScholarshipDetailPage({ params }: { params: Promis
       {related.length > 0 && (
         <Section>
           <Container>
-            <h2 className="font-heading text-2xl font-bold text-foreground">More scholarships in {scholarship.country}</h2>
+            <h2 className="font-heading text-2xl font-bold text-foreground">Related scholarships in {scholarship.country}</h2>
             <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((r) => (
                 <ScholarshipCard key={r.slug} scholarship={r} />

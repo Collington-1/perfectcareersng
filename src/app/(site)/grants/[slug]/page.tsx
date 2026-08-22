@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { HandCoins, Building2, CalendarClock, BadgeCheck, CheckCircle2 } from "lucide-react";
+import { HandCoins, Building2, CalendarClock, BadgeCheck } from "lucide-react";
 import { Container, Section } from "@/components/layout/container";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { AdSlot } from "@/components/layout/ad-slot";
 import { ShareButtons } from "@/components/content/share-buttons";
+import { ApplyButton } from "@/components/content/apply-button";
 import { GrantCard } from "@/components/content/grant-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDeadline } from "@/lib/format";
+import { formatDeadline, stripHtmlToExcerpt } from "@/lib/format";
 import { whatsappLink } from "@/lib/site-config";
 import { getAllGrants } from "@/lib/data";
 
@@ -23,7 +24,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const grants = await getAllGrants();
   const g = grants.find((x) => x.slug === slug);
   if (!g) return {};
-  return { title: `${g.title} — ${g.provider} | PerfectCareers`, description: g.description, alternates: { canonical: `/grants/${g.slug}` } };
+  return {
+    title: `${g.title} — ${g.provider} | PerfectCareers`,
+    description: stripHtmlToExcerpt(g.contentHtml),
+    alternates: { canonical: `/grants/${g.slug}` },
+  };
 }
 
 export default async function GrantDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -54,7 +59,7 @@ export default async function GrantDetailPage({ params }: { params: Promise<{ sl
 
               <div className="mt-5 flex flex-wrap gap-2">
                 <Badge variant="outline">{grant.industry}</Badge>
-                <Badge variant="outline">{grant.businessStage}</Badge>
+                {grant.businessStage && <Badge variant="outline">{grant.businessStage}</Badge>}
               </div>
 
               <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-y border-border py-4 text-sm text-muted-foreground">
@@ -72,30 +77,10 @@ export default async function GrantDetailPage({ params }: { params: Promise<{ sl
                 </span>
               </div>
 
-              <div className="prose prose-neutral mt-8 max-w-none">
-                <h2 className="font-heading text-xl font-semibold text-foreground">About this grant</h2>
-                <p className="text-muted-foreground">{grant.description}</p>
-
-                <h2 className="mt-8 font-heading text-xl font-semibold text-foreground">Eligibility</h2>
-                <ul className="mt-3 space-y-2">
-                  {grant.eligibility.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-muted-foreground">
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <h2 className="mt-8 font-heading text-xl font-semibold text-foreground">Requirements</h2>
-                <ul className="mt-3 space-y-2">
-                  {grant.requirements.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-muted-foreground">
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-secondary" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <div
+                className="prose prose-neutral mt-8 max-w-none prose-headings:font-heading prose-headings:text-foreground"
+                dangerouslySetInnerHTML={{ __html: grant.contentHtml }}
+              />
 
               <AdSlot type="in-article" className="mt-10" />
 
@@ -106,13 +91,19 @@ export default async function GrantDetailPage({ params }: { params: Promise<{ sl
 
             <aside className="space-y-6">
               <div className="rounded-2xl bg-white p-6 shadow-lg shadow-black/5 ring-1 ring-border">
-                <p className="font-heading text-lg font-bold text-foreground">Need help with your application?</p>
+                <p className="font-heading text-lg font-bold text-foreground">Ready to apply?</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Our grant writing service helps founders build a compelling, reviewer-ready application.
+                  Applications close {formatDeadline(grant.deadline)}.
                 </p>
-                <Button asChild size="lg" className="mt-4 w-full">
-                  <a href={whatsappLink(`Hi, I'd like help applying for the ${grant.title}.`)} target="_blank" rel="noopener noreferrer">
-                    Ask on WhatsApp
+                <div className="mt-4">
+                  <ApplyButton
+                    applicationUrl={grant.applicationUrl}
+                    whatsappMessage={`Hi, I'd like to apply for the ${grant.title}.`}
+                  />
+                </div>
+                <Button asChild size="lg" variant="secondary" className="mt-2 w-full">
+                  <a href={whatsappLink(`Hi, I'd like help writing a business plan for the ${grant.title}.`)} target="_blank" rel="noopener noreferrer">
+                    Get Business Plan
                   </a>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="mt-2 w-full">

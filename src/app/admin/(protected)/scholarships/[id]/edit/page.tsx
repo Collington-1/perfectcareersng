@@ -21,18 +21,17 @@ export default async function EditScholarshipPage({ params }: { params: Promise<
           title: scholarship.title,
           slug: scholarship.slug,
           categorySlug: scholarship.category.slug,
+          customCategory: scholarship.customCategory ?? "",
           country: scholarship.country,
           university: scholarship.university,
           amount: scholarship.amount ?? "",
           fundingType: scholarship.fundingType ?? "",
-          description: scholarship.description ?? "",
-          eligibility: (scholarship.eligibility as string[] | null) ?? [],
-          requirements: (scholarship.requirements as string[] | null) ?? [],
-          documents: (scholarship.documents as string[] | null) ?? [],
           howToApply: scholarship.howToApply ?? "",
           officialUrl: scholarship.officialUrl,
           deadline: scholarship.deadline ? scholarship.deadline.toISOString().slice(0, 10) : "",
           isFeatured: scholarship.isFeatured,
+          contentJson: scholarship.content,
+          contentHtml: scholarship.contentHtml,
         }}
       />
     </div>
