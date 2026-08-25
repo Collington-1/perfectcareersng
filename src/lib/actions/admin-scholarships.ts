@@ -61,7 +61,6 @@ export async function createScholarship(_prevState: AdminFormState, formData: Fo
   if ("error" in result) return { status: "error", message: result.error };
 
   const publishedAt = new Date();
-  const expiresAt = new Date(publishedAt.getTime() + 30 * 24 * 60 * 60 * 1000);
 
   try {
     await prisma.scholarship.create({
@@ -82,7 +81,6 @@ export async function createScholarship(_prevState: AdminFormState, formData: Fo
         deadline: result.data.deadline ? new Date(result.data.deadline) : undefined,
         isFeatured: result.data.isFeatured,
         publishedAt,
-        expiresAt,
       },
     });
   } catch {

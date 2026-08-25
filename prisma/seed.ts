@@ -191,10 +191,9 @@ async function main() {
   }
   console.log(`Seeded ${uniqueTags.length} tags.`);
 
-  // Jobs/Scholarships/Grants are "published" today, so the 30-day
-  // auto-expiry window runs from the actual seed date, not the mock date.
+  // Jobs/Scholarships/Grants are "published" today rather than on their
+  // original mock date, since they're going live into the real database now.
   const publishedAt = new Date();
-  const expiresAt = new Date(publishedAt.getTime() + 30 * 24 * 60 * 60 * 1000);
 
   // --- Jobs -------------------------------------------------------------
   let jobCount = 0;
@@ -224,7 +223,6 @@ async function main() {
         featuredImageUrl: "/images/jobs-hub.png",
         publishedAt,
         deadline: new Date(job.deadline),
-        expiresAt,
       },
     });
     jobCount++;
@@ -258,7 +256,6 @@ async function main() {
         featuredImageUrl: "/images/scholarships-hub.png",
         publishedAt,
         deadline: new Date(s.deadline),
-        expiresAt,
       },
     });
     scholarshipCount++;
@@ -292,7 +289,6 @@ async function main() {
         featuredImageUrl: "/images/grants-hub.png",
         publishedAt,
         deadline: new Date(g.deadline),
-        expiresAt,
       },
     });
     grantCount++;

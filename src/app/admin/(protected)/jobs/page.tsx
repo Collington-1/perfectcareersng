@@ -23,7 +23,7 @@ export default async function AdminJobsPage() {
               <th className="px-5 py-3">Title</th>
               <th className="px-5 py-3">Company</th>
               <th className="px-5 py-3">Category</th>
-              <th className="px-5 py-3">Expires</th>
+              <th className="px-5 py-3">Posted</th>
               <th className="px-5 py-3 text-right">Actions</th>
             </tr>
           </thead>
@@ -33,7 +33,7 @@ export default async function AdminJobsPage() {
                 <td className="px-5 py-3 font-medium text-foreground">{job.title}</td>
                 <td className="px-5 py-3 text-muted-foreground">{job.company.name}</td>
                 <td className="px-5 py-3 text-muted-foreground">{job.category.name}</td>
-                <td className="px-5 py-3 text-muted-foreground">{job.expiresAt ? formatDeadline(job.expiresAt.toISOString()) : "—"}</td>
+                <td className="px-5 py-3 text-muted-foreground">{formatDeadline(job.publishedAt.toISOString())}</td>
                 <td className="px-5 py-3">
                   <div className="flex items-center justify-end gap-1">
                     <Link

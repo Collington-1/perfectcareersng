@@ -23,7 +23,7 @@ export default async function AdminGrantsPage() {
               <th className="px-5 py-3">Title</th>
               <th className="px-5 py-3">Provider</th>
               <th className="px-5 py-3">Industry</th>
-              <th className="px-5 py-3">Expires</th>
+              <th className="px-5 py-3">Posted</th>
               <th className="px-5 py-3 text-right">Actions</th>
             </tr>
           </thead>
@@ -33,7 +33,7 @@ export default async function AdminGrantsPage() {
                 <td className="px-5 py-3 font-medium text-foreground">{g.title}</td>
                 <td className="px-5 py-3 text-muted-foreground">{g.provider}</td>
                 <td className="px-5 py-3 text-muted-foreground">{g.industry}</td>
-                <td className="px-5 py-3 text-muted-foreground">{g.expiresAt ? formatDeadline(g.expiresAt.toISOString()) : "—"}</td>
+                <td className="px-5 py-3 text-muted-foreground">{formatDeadline(g.publishedAt.toISOString())}</td>
                 <td className="px-5 py-3">
                   <div className="flex items-center justify-end gap-1">
                     <Link

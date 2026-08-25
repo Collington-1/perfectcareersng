@@ -23,7 +23,7 @@ export default async function AdminScholarshipsPage() {
               <th className="px-5 py-3">Title</th>
               <th className="px-5 py-3">University</th>
               <th className="px-5 py-3">Country</th>
-              <th className="px-5 py-3">Expires</th>
+              <th className="px-5 py-3">Posted</th>
               <th className="px-5 py-3 text-right">Actions</th>
             </tr>
           </thead>
@@ -33,7 +33,7 @@ export default async function AdminScholarshipsPage() {
                 <td className="px-5 py-3 font-medium text-foreground">{s.title}</td>
                 <td className="px-5 py-3 text-muted-foreground">{s.university}</td>
                 <td className="px-5 py-3 text-muted-foreground">{s.country}</td>
-                <td className="px-5 py-3 text-muted-foreground">{s.expiresAt ? formatDeadline(s.expiresAt.toISOString()) : "—"}</td>
+                <td className="px-5 py-3 text-muted-foreground">{formatDeadline(s.publishedAt.toISOString())}</td>
                 <td className="px-5 py-3">
                   <div className="flex items-center justify-end gap-1">
                     <Link
