@@ -11,8 +11,10 @@ export function stripHtmlToExcerpt(html: string, maxLength = 155) {
   return text.slice(0, maxLength - 1).trimEnd() + "…";
 }
 
-export function formatRelativeDate(dateString: string) {
+export function formatRelativeDate(dateString?: string | null) {
+  if (!dateString) return "Recently";
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Recently";
   const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
   if (days <= 0) return "Today";
   if (days === 1) return "1 day ago";
@@ -21,8 +23,11 @@ export function formatRelativeDate(dateString: string) {
   return `${months} month${months > 1 ? "s" : ""} ago`;
 }
 
-export function formatDeadline(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-NG", {
+export function formatDeadline(dateString?: string | null) {
+  if (!dateString) return "Open / Rolling";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Open / Rolling";
+  return date.toLocaleDateString("en-NG", {
     day: "numeric",
     month: "short",
     year: "numeric",

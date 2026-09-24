@@ -10,6 +10,7 @@ import { ApplyButton } from "@/components/content/apply-button";
 import { JobCard } from "@/components/content/job-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { OpportunityTracker } from "@/components/analytics/opportunity-tracker";
 import { formatDeadline, formatRelativeDate, stripHtmlToExcerpt } from "@/lib/format";
 import { getAllJobs } from "@/lib/data";
 
@@ -57,6 +58,11 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
 
   return (
     <>
+      <OpportunityTracker
+        opportunityType="JOB"
+        opportunitySlug={job.slug}
+        opportunityTitle={`${job.title} at ${job.company}`}
+      />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Section className="pb-0">
         <Container>
@@ -120,6 +126,9 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                   <ApplyButton
                     applicationUrl={job.applicationUrl}
                     whatsappMessage={`Hi, I'd like to apply for the ${job.title} role at ${job.company}.`}
+                    opportunityType="JOB"
+                    opportunitySlug={job.slug}
+                    opportunityTitle={`${job.title} at ${job.company}`}
                   />
                 </div>
                 <Button asChild variant="outline" size="lg" className="mt-2 w-full">

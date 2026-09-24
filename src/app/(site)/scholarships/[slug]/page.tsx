@@ -9,6 +9,8 @@ import { ShareButtons } from "@/components/content/share-buttons";
 import { ScholarshipCard } from "@/components/content/scholarship-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ApplyButton } from "@/components/content/apply-button";
+import { OpportunityTracker } from "@/components/analytics/opportunity-tracker";
 import { formatDeadline, stripHtmlToExcerpt } from "@/lib/format";
 import { whatsappLink } from "@/lib/site-config";
 import { getAllScholarships } from "@/lib/data";
@@ -40,6 +42,11 @@ export default async function ScholarshipDetailPage({ params }: { params: Promis
 
   return (
     <>
+      <OpportunityTracker
+        opportunityType="SCHOLARSHIP"
+        opportunitySlug={scholarship.slug}
+        opportunityTitle={scholarship.title}
+      />
       <Section className="pb-0">
         <Container>
           <Breadcrumbs items={[{ label: "Scholarships", href: "/scholarships" }, { label: scholarship.title }]} />
@@ -97,11 +104,23 @@ export default async function ScholarshipDetailPage({ params }: { params: Promis
 
             <aside className="space-y-6">
               <div className="rounded-2xl bg-white p-6 shadow-lg shadow-black/5 ring-1 ring-border">
-                <p className="font-heading text-lg font-bold text-foreground">Need help applying?</p>
+                <p className="font-heading text-lg font-bold text-foreground">Apply for Scholarship</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Our study abroad advisors review SOPs, documents and applications before you submit.
+                  Applications close {formatDeadline(scholarship.deadline)}.
                 </p>
-                <Button asChild size="lg" className="mt-4 w-full" variant="secondary">
+                {scholarship.officialUrl && (
+                  <div className="mt-4">
+                    <ApplyButton
+                      applicationUrl={scholarship.officialUrl}
+                      whatsappMessage={`Hi, I'd like help applying for the ${scholarship.title}.`}
+                      label="Official Application Link"
+                      opportunityType="SCHOLARSHIP"
+                      opportunitySlug={scholarship.slug}
+                      opportunityTitle={scholarship.title}
+                    />
+                  </div>
+                )}
+                <Button asChild size="lg" className="mt-3 w-full" variant="secondary">
                   <Link href="/services/study-abroad-documentation">Get Application Support</Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="mt-2 w-full">

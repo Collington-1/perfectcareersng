@@ -43,6 +43,7 @@ export type JobView = {
 
 export async function getAllJobs(): Promise<JobView[]> {
   const jobs = await prisma.job.findMany({
+    where: { isPublished: true },
     include: { company: true, category: true },
     orderBy: { publishedAt: "desc" },
   });
@@ -82,6 +83,7 @@ export type ScholarshipView = {
 
 export async function getAllScholarships(): Promise<ScholarshipView[]> {
   const rows = await prisma.scholarship.findMany({
+    where: { isPublished: true },
     include: { category: true },
     orderBy: { publishedAt: "desc" },
   });
@@ -117,7 +119,10 @@ export type GrantView = {
 };
 
 export async function getAllGrants(): Promise<GrantView[]> {
-  const rows = await prisma.grant.findMany({ orderBy: { publishedAt: "desc" } });
+  const rows = await prisma.grant.findMany({
+    where: { isPublished: true },
+    orderBy: { publishedAt: "desc" },
+  });
   return rows.map((g) => ({
     slug: g.slug,
     title: g.title,
@@ -136,6 +141,7 @@ export async function getAllGrants(): Promise<GrantView[]> {
 // ----------------------------------------------------------- Blog posts ---
 export async function getAllBlogPosts(): Promise<MockBlogPost[]> {
   const posts = await prisma.blogPost.findMany({
+    where: { isPublished: true },
     include: { author: true, category: true, tags: true },
     orderBy: { publishedAt: "desc" },
   });

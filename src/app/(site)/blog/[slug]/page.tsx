@@ -9,6 +9,7 @@ import { AdSlot } from "@/components/layout/ad-slot";
 import { ShareButtons } from "@/components/content/share-buttons";
 import { BlogCard } from "@/components/content/blog-card";
 import { Badge } from "@/components/ui/badge";
+import { OpportunityTracker } from "@/components/analytics/opportunity-tracker";
 import { formatDeadline } from "@/lib/format";
 import { blogCategoryImage } from "@/lib/mock-data";
 import { getAllBlogPosts, getAllAuthors } from "@/lib/data";
@@ -50,6 +51,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <>
+      <OpportunityTracker
+        opportunityType="BLOG"
+        opportunitySlug={post.slug}
+        opportunityTitle={post.title}
+      />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Section className="pb-0">
         <Container className="max-w-4xl">

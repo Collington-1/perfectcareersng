@@ -133,3 +133,41 @@ export async function deleteScholarship(id: string) {
   revalidatePath("/scholarships");
   revalidatePath("/");
 }
+
+export async function bulkDeleteScholarships(ids: string[]) {
+  if (!ids.length) return;
+  await prisma.scholarship.deleteMany({
+    where: { id: { in: ids } },
+  });
+  revalidatePath("/admin/scholarships");
+  revalidatePath("/scholarships");
+  revalidatePath("/");
+}
+
+export async function bulkSetScholarshipsPublishStatus(ids: string[], isPublished: boolean) {
+  if (!ids.length) return;
+  await prisma.scholarship.updateMany({
+    where: { id: { in: ids } },
+    data: {
+      isPublished,
+      ...(isPublished ? { publishedAt: new Date() } : {}),
+    },
+  });
+  revalidatePath("/admin/scholarships");
+  revalidatePath("/scholarships");
+  revalidatePath("/");
+}
+
+export async function toggleScholarshipPublishStatus(id: string, isPublished: boolean) {
+  await prisma.scholarship.update({
+    where: { id },
+    data: {
+      isPublished,
+      ...(isPublished ? { publishedAt: new Date() } : {}),
+    },
+  });
+  revalidatePath("/admin/scholarships");
+  revalidatePath("/scholarships");
+  revalidatePath("/");
+}
+

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, ExternalLink, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { whatsappLink } from "@/lib/site-config";
+import { trackOpportunityAction } from "@/components/analytics/opportunity-tracker";
 
 function resolveTarget(applicationUrl: string, whatsappMessage: string) {
   if (!applicationUrl || applicationUrl === "#apply-whatsapp") {
@@ -22,14 +23,31 @@ export function ApplyButton({
   applicationUrl,
   whatsappMessage,
   label = "Apply Now",
+  opportunityType = "JOB",
+  opportunitySlug,
+  opportunityTitle,
 }: {
   applicationUrl: string;
   whatsappMessage: string;
   label?: string;
+  opportunityType?: "JOB" | "SCHOLARSHIP" | "GRANT";
+  opportunitySlug?: string;
+  opportunityTitle?: string;
 }) {
   const [open, setOpen] = useState(false);
   const target = resolveTarget(applicationUrl, whatsappMessage);
   const Icon = target.kind === "email" ? Mail : target.kind === "whatsapp" ? MessageCircle : ExternalLink;
+
+  const handleDestinationClick = () => {
+    if (opportunitySlug && opportunityTitle) {
+      trackOpportunityAction({
+        opportunityType,
+        opportunitySlug,
+        opportunityTitle,
+        action: "APPLY",
+      });
+    }
+  };
 
   return (
     <div className="w-full">
@@ -42,6 +60,7 @@ export function ApplyButton({
           href={target.href}
           target={target.kind === "email" ? undefined : "_blank"}
           rel="noopener noreferrer"
+          onClick={handleDestinationClick}
           className="mt-2 flex items-center gap-2 rounded-lg bg-muted/60 px-3 py-2.5 text-sm text-foreground hover:bg-muted"
         >
           <Icon className="size-4 shrink-0 text-primary" />
@@ -51,3 +70,4 @@ export function ApplyButton({
     </div>
   );
 }
+

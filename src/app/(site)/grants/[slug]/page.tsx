@@ -10,6 +10,7 @@ import { ApplyButton } from "@/components/content/apply-button";
 import { GrantCard } from "@/components/content/grant-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { OpportunityTracker } from "@/components/analytics/opportunity-tracker";
 import { formatDeadline, stripHtmlToExcerpt } from "@/lib/format";
 import { whatsappLink } from "@/lib/site-config";
 import { getAllGrants } from "@/lib/data";
@@ -41,6 +42,11 @@ export default async function GrantDetailPage({ params }: { params: Promise<{ sl
 
   return (
     <>
+      <OpportunityTracker
+        opportunityType="GRANT"
+        opportunitySlug={grant.slug}
+        opportunityTitle={grant.title}
+      />
       <Section className="pb-0">
         <Container>
           <Breadcrumbs items={[{ label: "Grants", href: "/grants" }, { label: grant.title }]} />
@@ -99,6 +105,9 @@ export default async function GrantDetailPage({ params }: { params: Promise<{ sl
                   <ApplyButton
                     applicationUrl={grant.applicationUrl}
                     whatsappMessage={`Hi, I'd like to apply for the ${grant.title}.`}
+                    opportunityType="GRANT"
+                    opportunitySlug={grant.slug}
+                    opportunityTitle={grant.title}
                   />
                 </div>
                 <Button asChild size="lg" variant="secondary" className="mt-2 w-full">

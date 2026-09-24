@@ -131,3 +131,41 @@ export async function deleteGrant(id: string) {
   revalidatePath("/grants");
   revalidatePath("/");
 }
+
+export async function bulkDeleteGrants(ids: string[]) {
+  if (!ids.length) return;
+  await prisma.grant.deleteMany({
+    where: { id: { in: ids } },
+  });
+  revalidatePath("/admin/grants");
+  revalidatePath("/grants");
+  revalidatePath("/");
+}
+
+export async function bulkSetGrantsPublishStatus(ids: string[], isPublished: boolean) {
+  if (!ids.length) return;
+  await prisma.grant.updateMany({
+    where: { id: { in: ids } },
+    data: {
+      isPublished,
+      ...(isPublished ? { publishedAt: new Date() } : {}),
+    },
+  });
+  revalidatePath("/admin/grants");
+  revalidatePath("/grants");
+  revalidatePath("/");
+}
+
+export async function toggleGrantPublishStatus(id: string, isPublished: boolean) {
+  await prisma.grant.update({
+    where: { id },
+    data: {
+      isPublished,
+      ...(isPublished ? { publishedAt: new Date() } : {}),
+    },
+  });
+  revalidatePath("/admin/grants");
+  revalidatePath("/grants");
+  revalidatePath("/");
+}
+

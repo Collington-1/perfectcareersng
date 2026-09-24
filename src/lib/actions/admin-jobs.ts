@@ -142,3 +142,41 @@ export async function deleteJob(id: string) {
   revalidatePath("/jobs");
   revalidatePath("/");
 }
+
+export async function bulkDeleteJobs(ids: string[]) {
+  if (!ids.length) return;
+  await prisma.job.deleteMany({
+    where: { id: { in: ids } },
+  });
+  revalidatePath("/admin/jobs");
+  revalidatePath("/jobs");
+  revalidatePath("/");
+}
+
+export async function bulkSetJobsPublishStatus(ids: string[], isPublished: boolean) {
+  if (!ids.length) return;
+  await prisma.job.updateMany({
+    where: { id: { in: ids } },
+    data: {
+      isPublished,
+      ...(isPublished ? { publishedAt: new Date() } : {}),
+    },
+  });
+  revalidatePath("/admin/jobs");
+  revalidatePath("/jobs");
+  revalidatePath("/");
+}
+
+export async function toggleJobPublishStatus(id: string, isPublished: boolean) {
+  await prisma.job.update({
+    where: { id },
+    data: {
+      isPublished,
+      ...(isPublished ? { publishedAt: new Date() } : {}),
+    },
+  });
+  revalidatePath("/admin/jobs");
+  revalidatePath("/jobs");
+  revalidatePath("/");
+}
+

@@ -136,3 +136,38 @@ export async function deleteBlogPost(id: string) {
   revalidatePath("/admin/blog");
   revalidatePath("/blog");
 }
+
+export async function bulkDeleteBlogPosts(ids: string[]) {
+  if (!ids.length) return;
+  await prisma.blogPost.deleteMany({
+    where: { id: { in: ids } },
+  });
+  revalidatePath("/admin/blog");
+  revalidatePath("/blog");
+}
+
+export async function bulkSetBlogPostsPublishStatus(ids: string[], isPublished: boolean) {
+  if (!ids.length) return;
+  await prisma.blogPost.updateMany({
+    where: { id: { in: ids } },
+    data: {
+      isPublished,
+      ...(isPublished ? { publishedAt: new Date() } : {}),
+    },
+  });
+  revalidatePath("/admin/blog");
+  revalidatePath("/blog");
+}
+
+export async function toggleBlogPostPublishStatus(id: string, isPublished: boolean) {
+  await prisma.blogPost.update({
+    where: { id },
+    data: {
+      isPublished,
+      ...(isPublished ? { publishedAt: new Date() } : {}),
+    },
+  });
+  revalidatePath("/admin/blog");
+  revalidatePath("/blog");
+}
+

@@ -124,6 +124,7 @@ model Job {
   seoDescription String?
 
   isFeatured  Boolean   @default(false)
+  isPublished Boolean   @default(true)
   publishedAt DateTime  @default(now())
   deadline    DateTime?
   // Auto-set to publishedAt + 30 days at creation. A daily Netlify
@@ -135,6 +136,7 @@ model Job {
 
   @@index([publishedAt])
   @@index([categoryId])
+  @@index([isPublished])
 }
 
 model Scholarship {
@@ -167,6 +169,7 @@ model Scholarship {
   seoDescription   String?
 
   isFeatured  Boolean   @default(false)
+  isPublished Boolean   @default(true)
   publishedAt DateTime  @default(now())
   deadline    DateTime?
   // Auto-set to publishedAt + 30 days at creation. A daily Netlify
@@ -178,6 +181,7 @@ model Scholarship {
 
   @@index([publishedAt])
   @@index([categoryId])
+  @@index([isPublished])
 }
 
 model Grant {
@@ -209,6 +213,7 @@ model Grant {
   seoDescription   String?
 
   isFeatured  Boolean   @default(false)
+  isPublished Boolean   @default(true)
   publishedAt DateTime  @default(now())
   deadline    DateTime?
   // Auto-set to publishedAt + 30 days at creation. A daily Netlify
@@ -220,6 +225,7 @@ model Grant {
 
   @@index([publishedAt])
   @@index([categoryId])
+  @@index([isPublished])
 }
 
 model BlogPost {
@@ -246,6 +252,7 @@ model BlogPost {
   seoDescription     String?
 
   isFeatured  Boolean  @default(false)
+  isPublished Boolean  @default(true)
   publishedAt DateTime @default(now())
 
   createdAt DateTime @default(now())
@@ -253,6 +260,37 @@ model BlogPost {
 
   @@index([publishedAt])
   @@index([categoryId])
+  @@index([isPublished])
+}
+
+model OpportunityClick {
+  id               String      @id @default(cuid())
+  opportunityType  ContentType
+  opportunityId    String?
+  opportunitySlug  String
+  opportunityTitle String
+  action           String      @default("VIEW") // "VIEW" | "APPLY"
+
+  visitorId        String?
+  ipAddress        String?
+  country          String?
+  countryCode      String?
+  region           String?
+  city             String?
+  latitude         Float?
+  longitude        Float?
+
+  userAgent        String?
+  deviceType       String?     // "desktop" | "mobile" | "tablet"
+  referrer         String?
+
+  createdAt        DateTime    @default(now())
+
+  @@index([opportunityType, createdAt])
+  @@index([opportunitySlug])
+  @@index([country])
+  @@index([visitorId])
+  @@index([createdAt])
 }
 
 model Testimonial {
