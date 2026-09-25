@@ -1,5 +1,20 @@
 import { prisma } from "@/lib/prisma";
 
+export type AnalyticsClickItem = {
+  id: string;
+  opportunitySlug: string;
+  opportunityTitle: string;
+  opportunityType: "JOB" | "SCHOLARSHIP" | "GRANT" | "BLOG";
+  action: string; // "VIEW" | "APPLY"
+  visitorId: string | null;
+  country: string;
+  countryCode: string | null;
+  region: string | null;
+  city: string | null;
+  deviceType: string | null;
+  createdAt: string; // ISO string for client
+};
+
 export type AnalyticsOverview = {
   totalClicks: number;
   totalViews: number;
@@ -43,7 +58,7 @@ export type RecentActivity = {
   country: string;
   city: string | null;
   deviceType: string | null;
-  createdAt: Date;
+  createdAt: string; // ISO string
 };
 
 export type TypeDistribution = {
@@ -58,34 +73,35 @@ export async function getOpportunityAnalytics() {
     totalClicks,
     totalViews,
     totalApplies,
-    recentClicks,
-    allClicks,
+    clicksFromDb,
   ] = await Promise.all([
     prisma.opportunityClick.count(),
     prisma.opportunityClick.count({ where: { action: "VIEW" } }),
     prisma.opportunityClick.count({ where: { action: "APPLY" } }),
     prisma.opportunityClick.findMany({
       orderBy: { createdAt: "desc" },
-      take: 15,
-    }),
-    prisma.opportunityClick.findMany({
-      select: {
-        opportunitySlug: true,
-        opportunityTitle: true,
-        opportunityType: true,
-        action: true,
-        visitorId: true,
-        country: true,
-        countryCode: true,
-        region: true,
-        city: true,
-      },
+      take: 2000,
     }),
   ]);
 
+  const rawClicks: AnalyticsClickItem[] = clicksFromDb.map((c) => ({
+    id: c.id,
+    opportunitySlug: c.opportunitySlug,
+    opportunityTitle: c.opportunityTitle,
+    opportunityType: c.opportunityType,
+    action: c.action,
+    visitorId: c.visitorId,
+    country: c.country || "Unknown",
+    countryCode: c.countryCode,
+    region: c.region,
+    city: c.city,
+    deviceType: c.deviceType,
+    createdAt: c.createdAt.toISOString(),
+  }));
+
   // Unique visitors overall
   const visitorSet = new Set<string>();
-  allClicks.forEach((c) => {
+  rawClicks.forEach((c) => {
     if (c.visitorId) visitorSet.add(c.visitorId);
   });
   const uniqueVisitors = visitorSet.size || (totalClicks > 0 ? Math.min(totalClicks, 1) : 0);
@@ -103,7 +119,7 @@ export async function getOpportunityAnalytics() {
     }
   >();
 
-  allClicks.forEach((c) => {
+  rawClicks.forEach((c) => {
     const key = `${c.opportunityType}_${c.opportunitySlug}`;
     let item = oppMap.get(key);
     if (!item) {
@@ -150,7 +166,7 @@ export async function getOpportunityAnalytics() {
     { country: string; countryCode: string | null; count: number; visitors: Set<string> }
   >();
 
-  allClicks.forEach((c) => {
+  rawClicks.forEach((c) => {
     const countryName = c.country || "Unknown";
     let entry = countryMap.get(countryName);
     if (!entry) {
@@ -179,7 +195,7 @@ export async function getOpportunityAnalytics() {
 
   // Group by City
   const cityMap = new Map<string, { city: string; country: string; region: string | null; count: number }>();
-  allClicks.forEach((c) => {
+  rawClicks.forEach((c) => {
     if (c.city && c.city !== "Unknown") {
       const key = `${c.city}_${c.country}`;
       let entry = cityMap.get(key);
@@ -200,13 +216,12 @@ export async function getOpportunityAnalytics() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
 
-  // Top summary
   const topCountry = topCountries[0]?.country || "None yet";
   const topCity = topCities[0]?.city || "None yet";
 
   // Content type distribution
   const typeCounts: Record<string, number> = { JOB: 0, SCHOLARSHIP: 0, GRANT: 0, BLOG: 0 };
-  allClicks.forEach((c) => {
+  rawClicks.forEach((c) => {
     if (typeCounts[c.opportunityType] !== undefined) {
       typeCounts[c.opportunityType]++;
     }
@@ -228,13 +243,13 @@ export async function getOpportunityAnalytics() {
     })
   );
 
-  const formattedRecentActivity: RecentActivity[] = recentClicks.map((r) => ({
+  const recentActivity: RecentActivity[] = rawClicks.slice(0, 20).map((r) => ({
     id: r.id,
     title: r.opportunityTitle,
     slug: r.opportunitySlug,
     type: r.opportunityType,
     action: r.action,
-    country: r.country || "Unknown",
+    country: r.country,
     city: r.city,
     deviceType: r.deviceType,
     createdAt: r.createdAt,
@@ -249,10 +264,11 @@ export async function getOpportunityAnalytics() {
       topCountry,
       topCity,
     },
+    rawClicks,
     topOpportunities,
     topCountries,
     topCities,
     typeDistribution,
-    recentActivity: formattedRecentActivity,
+    recentActivity,
   };
 }

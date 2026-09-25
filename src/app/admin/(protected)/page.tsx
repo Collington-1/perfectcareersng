@@ -68,6 +68,7 @@ export default async function AdminDashboardPage() {
         topCities={analyticsData.topCities}
         typeDistribution={analyticsData.typeDistribution}
         recentActivity={analyticsData.recentActivity}
+        rawClicks={analyticsData.rawClicks}
       />
     </div>
   );
